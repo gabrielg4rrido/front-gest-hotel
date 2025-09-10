@@ -1,0 +1,45 @@
+{
+  "name": "hotel-booking-prototype",
+  "version": "1.0.0",
+  "description": "Sistema de reservas do hotel Carioca Palace",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "capture": "node scripts/capture-screens.js",
+    "export-figma": "node scripts/export-to-figma.js",
+    "figma-sync": "node scripts/sync-figma.js",
+    "prepare-export": "npm run export-figma && npm run capture"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "lucide-react": "latest",
+    "motion": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "autoprefixer": "^10.0.0",
+    "postcss": "^8.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0",
+    "puppeteer": "^21.0.0",
+    "@figma/code-connect": "^1.0.0"
+  },
+  "keywords": [
+    "react",
+    "tailwind",
+    "figma",
+    "prototype",
+    "hotel",
+    "booking"
+  ],
+  "exports": {
+    "figma": "./exports/figma-ready/",
+    "screenshots": "./exports/screenshots/",
+    "components": "./components/"
+  }
+}

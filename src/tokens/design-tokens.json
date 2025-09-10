@@ -1,0 +1,83 @@
+{
+  "colors": {
+    "background": {
+      "value": "#ffffff",
+      "type": "color",
+      "description": "Background color"
+    },
+    "foreground": {
+      "value": "oklch(0.145 0 0)",
+      "type": "color", 
+      "description": "Primary text color"
+    },
+    "primary": {
+      "value": "#030213",
+      "type": "color",
+      "description": "Primary brand color"
+    },
+    "secondary": {
+      "value": "oklch(0.95 0.0058 264.53)",
+      "type": "color",
+      "description": "Secondary brand color"
+    },
+    "destructive": {
+      "value": "#d4183d",
+      "type": "color",
+      "description": "Error/destructive color"
+    }
+  },
+  "spacing": {
+    "xs": {
+      "value": "0.25rem",
+      "type": "spacing"
+    },
+    "sm": {
+      "value": "0.5rem", 
+      "type": "spacing"
+    },
+    "md": {
+      "value": "1rem",
+      "type": "spacing"
+    },
+    "lg": {
+      "value": "1.5rem",
+      "type": "spacing"
+    },
+    "xl": {
+      "value": "2rem",
+      "type": "spacing"
+    }
+  },
+  "typography": {
+    "font-size": {
+      "base": {
+        "value": "14px",
+        "type": "fontSizes"
+      }
+    },
+    "font-weight": {
+      "normal": {
+        "value": "400",
+        "type": "fontWeights"
+      },
+      "medium": {
+        "value": "500", 
+        "type": "fontWeights"
+      }
+    }
+  },
+  "radius": {
+    "sm": {
+      "value": "calc(0.625rem - 4px)",
+      "type": "borderRadius"
+    },
+    "md": {
+      "value": "calc(0.625rem - 2px)",
+      "type": "borderRadius"
+    },
+    "lg": {
+      "value": "0.625rem",
+      "type": "borderRadius"
+    }
+  }
+}
