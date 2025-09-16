@@ -1,8 +1,8 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { ImageWithFallback } from './figma/ImageWithFallback';
-import { Breadcrumb } from './Breadcrumb';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { Breadcrumb } from '../components/Breadcrumb';
 
 interface ServicesPageProps {
   onNavigate: (page: string, serviceId?: number) => void;
