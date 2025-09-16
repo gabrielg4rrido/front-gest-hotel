@@ -1,6 +1,6 @@
 
   {
-      "name": "Sistema Hotel Carioca Palace",
+      "name": "Sistema de Reservas de Hotel",
       "version": "0.1.0",
       "private": true,
       "dependencies": {

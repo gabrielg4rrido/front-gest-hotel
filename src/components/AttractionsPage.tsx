@@ -3,10 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { Breadcrumb } from './Breadcrumb';
 
-export function AttractionsPage() {
+interface AttractionsPageProps {
+  onNavigate: (page: string, attractionId?: number) => void;
+}
+
+export function AttractionsPage({ onNavigate }: AttractionsPageProps) {
   const attractions = [
     {
+      id: 1,
       name: 'Praia Paradisíaca',
       description: 'Águas cristalinas e areia branca a apenas 5 minutos do hotel',
       distance: '500m',
@@ -15,6 +21,7 @@ export function AttractionsPage() {
       image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400'
     },
     {
+      id: 2,
       name: 'Centro Histórico',
       description: 'Arquitetura colonial preservada e museus interessantes',
       distance: '2km',
@@ -23,6 +30,7 @@ export function AttractionsPage() {
       image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400'
     },
     {
+      id: 3,
       name: 'Trilha da Montanha',
       description: 'Vista espetacular da cidade e do mar',
       distance: '8km',
@@ -31,6 +39,7 @@ export function AttractionsPage() {
       image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400'
     },
     {
+      id: 4,
       name: 'Mercado Local',
       description: 'Produtos artesanais e culinária típica da região',
       distance: '1.5km',
@@ -39,6 +48,7 @@ export function AttractionsPage() {
       image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=400'
     },
     {
+      id: 5,
       name: 'Marina e Porto',
       description: 'Passeios de barco e esportes aquáticos',
       distance: '3km',
@@ -47,6 +57,7 @@ export function AttractionsPage() {
       image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400'
     },
     {
+      id: 6,
       name: 'Parque Nacional',
       description: 'Fauna e flora exuberantes em trilhas ecológicas',
       distance: '15km',
@@ -77,9 +88,16 @@ export function AttractionsPage() {
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
+  const breadcrumbItems = [
+    { label: 'Atrações', href: '#' }
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
+        {/* Breadcrumb */}
+        <Breadcrumb items={breadcrumbItems} onNavigate={onNavigate} />
+
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl mb-4">Atrações & Atividades</h1>
@@ -123,7 +141,11 @@ export function AttractionsPage() {
                 
                 <CardContent>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => onNavigate('attraction-details', attraction.id)}
+                    >
                       Ver Detalhes
                     </Button>
                     <Button className="flex-1">
@@ -149,7 +171,7 @@ export function AttractionsPage() {
                 </CardHeader>
                 <CardContent>
                   <Button variant="outline" className="w-full">
-                    Reservar
+                    Mais Informações
                   </Button>
                 </CardContent>
               </Card>

@@ -8,9 +8,10 @@ import { Separator } from './ui/separator';
 interface AuthPagesProps {
   currentPage: 'login' | 'register';
   onNavigate: (page: string) => void;
+  onLogin?: (userData: { name: string; email: string; avatar: string }) => void;
 }
 
-export function AuthPages({ currentPage, onNavigate }: AuthPagesProps) {
+export function AuthPages({ currentPage, onNavigate, onLogin }: AuthPagesProps) {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -28,6 +29,21 @@ export function AuthPages({ currentPage, onNavigate }: AuthPagesProps) {
     e.preventDefault();
     // Aqui seria feita a integração com backend/Supabase
     console.log('Form submitted:', formData);
+    
+    // Simular login bem-sucedido
+    if (currentPage === 'login' && onLogin) {
+      onLogin({
+        name: 'João Silva',
+        email: formData.email || 'joao.silva@email.com',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400'
+      });
+    } else if (currentPage === 'register' && onLogin) {
+      onLogin({
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400'
+      });
+    }
     
     // Simular sucesso e navegar para home
     alert(currentPage === 'login' ? 'Login realizado com sucesso!' : 'Cadastro realizado com sucesso!');

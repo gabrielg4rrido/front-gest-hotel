@@ -1,7 +1,7 @@
 {
   "name": "hotel-booking-prototype",
   "version": "1.0.0",
-  "description": "Sistema de reservas do hotel Carioca Palace",
+  "description": "Protótipo navegável de sistema de reservas de hotel",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

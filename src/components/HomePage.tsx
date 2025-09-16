@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "./ui/card";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { SearchForm } from "./SearchForm";
 
 interface HomePageProps {
   onNavigate: (page: string, roomId?: number) => void;
@@ -33,6 +34,16 @@ export function HomePage({ onNavigate }: HomePageProps) {
     },
   ];
 
+  const handleSearch = (searchData: {
+    checkIn: string;
+    checkOut: string;
+    guests: number;
+  }) => {
+    // Store search data in sessionStorage for use in rooms page
+    sessionStorage.setItem('hotelSearch', JSON.stringify(searchData));
+    onNavigate('rooms');
+  };
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -46,23 +57,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
             Experimente o luxo e conforto em uma localização
             paradisíaca. Sua estadia dos sonhos começa aqui.
           </p>
-          <div className="space-x-4">
-            <Button
-              size="lg"
-              className="bg-white text-blue-800 hover:bg-gray-100"
-              onClick={() => onNavigate("rooms")}
-            >
-              Ver Quartos
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white text-blue-800 hover:bg-white hover:text-blue-800"
-              onClick={() => onNavigate("register")}
-            >
-              Reservar Agora
-            </Button>
-          </div>
+        </div>
+      </section>
+
+      {/* Search Section */}
+      <section className="relative -mt-16 z-20 px-4">
+        <div className="container mx-auto">
+          <SearchForm onSearch={handleSearch} />
         </div>
       </section>
 

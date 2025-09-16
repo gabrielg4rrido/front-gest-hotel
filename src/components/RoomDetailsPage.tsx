@@ -188,9 +188,7 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
 
   const handleReservation = () => {
     onOpenPayment('room', {
-      id: roomId,
-      title: room.name,
-      type: 'room',
+      name: room.name,
       price: room.price,
       guests: room.capacity
     });
@@ -208,134 +206,145 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
           onNavigate={onNavigate}
         />
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Galeria de Imagens */}
-          <div className="lg:col-span-2">
-            <Card className="overflow-hidden">
-              <CardContent className="p-6">
-                <ImageGallery images={room.images} title={room.name} />
-              </CardContent>
-            </Card>
+        {/* Galeria de Imagens */}
+        <Card className="overflow-hidden mb-8">
+          <CardContent className="p-6">
+            <ImageGallery images={room.images} title={room.name} />
+          </CardContent>
+        </Card>
 
-            {/* Informações do Quarto */}
-            <Card className="mt-6">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-3xl">{room.name}</CardTitle>
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${
-                              i < Math.floor(room.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm text-gray-600">
-                        {room.rating} ({room.reviews} avaliações)
-                      </span>
-                    </div>
+        {/* Informações do Quarto */}
+        <Card className="mb-8">
+          <CardHeader>
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className="text-3xl">{room.name}</CardTitle>
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          i < Math.floor(room.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
                   </div>
-                  <div className="text-right">
-                    <div className="text-3xl text-primary">R$ {room.price}</div>
-                    <div className="text-sm text-gray-600">por noite</div>
-                  </div>
+                  <span className="text-sm text-gray-600">
+                    {room.rating} ({room.reviews} avaliações)
+                  </span>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 mb-6">{room.description}</p>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl text-primary">R$ {room.price}</div>
+                <div className="text-sm text-gray-600">por noite</div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-700 mb-6">{room.description}</p>
 
-                {/* Informações Básicas */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                  <div className="flex items-center gap-2">
-                    <Square className="w-5 h-5 text-gray-600" />
-                    <span>{room.area}</span>
+            {/* Informações Básicas */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="flex items-center gap-2">
+                <Square className="w-5 h-5 text-gray-600" />
+                <span>{room.area}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-gray-600" />
+                <span>Até {room.capacity} pessoas</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Bed className="w-5 h-5 text-gray-600" />
+                <span>{room.beds}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Bath className="w-5 h-5 text-gray-600" />
+                <span>{room.bathroom}</span>
+              </div>
+            </div>
+
+            {/* Comodidades */}
+            <div className="mb-6">
+              <h3 className="text-xl mb-3">Comodidades Incluídas</h3>
+              <div className="grid md:grid-cols-2 gap-2">
+                {room.features.map((feature, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span className="text-sm">{feature}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-gray-600" />
+                ))}
+              </div>
+            </div>
+
+            {/* Serviços do Hotel */}
+            <div>
+              <h3 className="text-xl mb-3">Serviços do Hotel</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {room.amenities.map((amenity, index) => (
+                  <div key={index} className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
+                    <amenity.icon className="w-6 h-6 text-primary mb-2" />
+                    <span className="text-sm">{amenity.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Card de Reserva */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Reservar Quarto</CardTitle>
+            <CardDescription>
+              {room.name} - A partir de R$ {room.price} por noite
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Coluna 1: Informações de Reserva */}
+              <div className="space-y-4">
+                {/* Informações de Capacidade */}
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span>Capacidade:</span>
                     <span>Até {room.capacity} pessoas</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Bed className="w-5 h-5 text-gray-600" />
-                    <span>{room.beds}</span>
+                  <div className="flex justify-between items-center mb-2">
+                    <span>Área:</span>
+                    <span>{room.area}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Bath className="w-5 h-5 text-gray-600" />
-                    <span>{room.bathroom}</span>
-                  </div>
-                </div>
-
-                {/* Comodidades */}
-                <div className="mb-6">
-                  <h3 className="text-xl mb-3">Comodidades Incluídas</h3>
-                  <div className="grid md:grid-cols-2 gap-2">
-                    {room.features.map((feature, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-primary rounded-full"></div>
-                        <span className="text-sm">{feature}</span>
-                      </div>
-                    ))}
+                  <div className="flex justify-between items-center">
+                    <span>Preço por noite:</span>
+                    <span className="text-xl text-primary">R$ {room.price}</span>
                   </div>
                 </div>
 
-                {/* Serviços do Hotel */}
-                <div>
-                  <h3 className="text-xl mb-3">Serviços do Hotel</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {room.amenities.map((amenity, index) => (
-                      <div key={index} className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
-                        <amenity.icon className="w-6 h-6 text-primary mb-2" />
-                        <span className="text-sm">{amenity.name}</span>
-                      </div>
-                    ))}
-                  </div>
+                <Button onClick={handleReservation} className="w-full" size="lg">
+                  Reservar Agora
+                </Button>
+
+                <div className="space-y-2 text-sm text-gray-600">
+                  <p>✓ Cancelamento gratuito até 24h antes</p>
+                  <p>✓ Não cobramos taxa de reserva</p>
+                  <p>✓ Confirmação imediata</p>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
 
-          {/* Card de Reserva */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-8">
-              <CardHeader>
-                <CardTitle>Reservar Quarto</CardTitle>
-                <CardDescription>
-                  {room.name} - A partir de R$ {room.price} por noite
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Informações de Capacidade */}
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex justify-between items-center mb-2">
-                      <span>Capacidade:</span>
-                      <span>Até {room.capacity} pessoas</span>
-                    </div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span>Área:</span>
-                      <span>{room.area}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Preço por noite:</span>
-                      <span className="text-xl text-primary">R$ {room.price}</span>
-                    </div>
-                  </div>
-
-                  <Button onClick={handleReservation} className="w-full" size="lg">
-                    Reservar Agora
-                  </Button>
-
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <p>✓ Cancelamento gratuito até 24h antes</p>
-                    <p>✓ Não cobramos taxa de reserva</p>
-                    <p>✓ Confirmação imediata</p>
+              {/* Coluna 2: Contato e Benefícios */}
+              <div className="space-y-4">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h4 className="text-lg mb-3">Benefícios da Reserva</h4>
+                  <div className="space-y-2 text-sm">
+                    <p>✓ Check-in a partir das 15h</p>
+                    <p>✓ Check-out até 12h</p>
+                    <p>✓ Wi-Fi gratuito em todo o hotel</p>
+                    <p>✓ Acesso à piscina e academia</p>
+                    <p>✓ Estacionamento incluso</p>
                   </div>
                 </div>
 
-                <div className="mt-6 space-y-3">
+                <div className="space-y-3">
                   <p className="text-sm text-gray-600 text-center">
                     Dúvidas? Entre em contato conosco
                   </p>
@@ -350,10 +359,69 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
                     </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Seção de Avaliações */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Avaliações dos Hóspedes</CardTitle>
+              <div className="flex items-center gap-2">
+                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                <span>{room.rating} de 5</span>
+                <span className="text-gray-500">({room.reviews} avaliações)</span>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {/* Sample Reviews */}
+            <div className="space-y-6">
+              {[
+                {
+                  name: 'Carlos Mendes',
+                  rating: 5,
+                  comment: 'Quarto excelente! Muito limpo e confortável. A vista é maravilhosa.',
+                  date: '20 de agosto, 2024'
+                },
+                {
+                  name: 'Marina Santos',
+                  rating: 4,
+                  comment: 'Gostei muito da estadia. O quarto é espaçoso e bem equipado.',
+                  date: '15 de agosto, 2024'
+                },
+                {
+                  name: 'Roberto Silva',
+                  rating: 5,
+                  comment: 'Perfeito para uma estadia relaxante. Recomendo!',
+                  date: '12 de agosto, 2024'
+                }
+              ].map((review, index) => (
+                <div key={index} className="border-b border-gray-100 last:border-0 pb-6 last:pb-0">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                        <span className="text-sm">{review.name.charAt(0)}</span>
+                      </div>
+                      <div>
+                        <p className="text-sm">{review.name}</p>
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: review.rating }).map((_, i) => (
+                            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-sm text-gray-500">{review.date}</span>
+                  </div>
+                  <p className="text-gray-600">{review.comment}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

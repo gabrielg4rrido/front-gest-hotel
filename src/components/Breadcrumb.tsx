@@ -4,13 +4,15 @@ import { ChevronRight, Home } from 'lucide-react';
 
 interface BreadcrumbItem {
   label: string;
-  page: string;
+  page?: string;
   roomId?: number;
+  href?: string;
+  onClick?: () => void;
 }
 
 interface BreadcrumbProps {
   items: BreadcrumbItem[];
-  onNavigate: (page: string, roomId?: number) => void;
+  onNavigate?: (page: string, roomId?: number) => void;
 }
 
 export function Breadcrumb({ items, onNavigate }: BreadcrumbProps) {
@@ -19,7 +21,7 @@ export function Breadcrumb({ items, onNavigate }: BreadcrumbProps) {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => onNavigate('home')}
+        onClick={() => onNavigate?.('home')}
         className="flex items-center gap-1 px-2 py-1 h-auto text-gray-600 hover:text-primary"
       >
         <Home className="w-4 h-4" />
@@ -35,7 +37,13 @@ export function Breadcrumb({ items, onNavigate }: BreadcrumbProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onNavigate(item.page, item.roomId)}
+              onClick={() => {
+                if (item.onClick) {
+                  item.onClick();
+                } else if (item.page && onNavigate) {
+                  onNavigate(item.page, item.roomId);
+                }
+              }}
               className="px-2 py-1 h-auto text-gray-600 hover:text-primary"
             >
               {item.label}

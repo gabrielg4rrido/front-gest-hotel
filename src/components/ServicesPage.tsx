@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { Breadcrumb } from './Breadcrumb';
 
 interface ServicesPageProps {
   onNavigate: (page: string, serviceId?: number) => void;
@@ -59,9 +60,16 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
     }
   ];
 
+  const breadcrumbItems = [
+    { label: 'Serviços', href: '#' }
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
+        {/* Breadcrumb */}
+        <Breadcrumb items={breadcrumbItems} />
+
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl mb-4">Nossos Serviços</h1>
@@ -74,35 +82,37 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
         {/* Services Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => (
-            <Card key={index} className="overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="aspect-video relative">
+            <Card key={index} className="overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full">
+              <div className="relative h-48 w-full">
                 <ImageWithFallback
                   src={service.image}
                   alt={service.title}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-4 left-4">
-                  <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center text-2xl">
+                  <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center text-2xl shadow-sm">
                     {service.icon}
                   </div>
                 </div>
               </div>
               
-              <CardHeader>
-                <CardTitle>{service.title}</CardTitle>
-                <CardDescription>{service.description}</CardDescription>
-              </CardHeader>
-              
-              <CardContent>
-                <p className="text-sm text-gray-600 mb-4">{service.details}</p>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => onNavigate('service-details', service.id)}
-                >
-                  Saiba Mais
-                </Button>
-              </CardContent>
+              <div className="flex flex-col flex-grow">
+                <CardHeader className="flex-shrink-0 pb-3">
+                  <CardTitle className="text-xl">{service.title}</CardTitle>
+                  <CardDescription className="text-sm">{service.description}</CardDescription>
+                </CardHeader>
+                
+                <CardContent className="flex flex-col flex-grow pt-0">
+                  <p className="text-sm text-gray-600 mb-6 flex-grow min-h-[2.5rem]">{service.details}</p>
+                  <Button 
+                    variant="outline" 
+                    className="w-full mt-auto"
+                    onClick={() => onNavigate('service-details', service.id)}
+                  >
+                    Ver Detalhes
+                  </Button>
+                </CardContent>
+              </div>
             </Card>
           ))}
         </div>

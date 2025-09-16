@@ -33,7 +33,6 @@ export function Footer() {
               <li><a href="#" className="hover:opacity-100 transition-opacity">Home</a></li>
               <li><a href="#" className="hover:opacity-100 transition-opacity">Quartos</a></li>
               <li><a href="#" className="hover:opacity-100 transition-opacity">Serviços</a></li>
-              <li><a href="#" className="hover:opacity-100 transition-opacity">Atrações</a></li>
               <li><a href="#" className="hover:opacity-100 transition-opacity">Contato</a></li>
             </ul>
           </div>

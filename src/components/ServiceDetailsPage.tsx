@@ -25,10 +25,9 @@ import {
 interface ServiceDetailsPageProps {
   serviceId: number;
   onNavigate: (page: string, serviceId?: number) => void;
-  onOpenPayment: (type: 'service', data: any) => void;
 }
 
-export function ServiceDetailsPage({ serviceId, onNavigate, onOpenPayment }: ServiceDetailsPageProps) {
+export function ServiceDetailsPage({ serviceId, onNavigate }: ServiceDetailsPageProps) {
   const services = [
     {
       id: 1,
@@ -227,15 +226,7 @@ export function ServiceDetailsPage({ serviceId, onNavigate, onOpenPayment }: Ser
     { label: service.title, href: '#' }
   ];
 
-  const handleBookService = () => {
-    onOpenPayment('service', {
-      id: service.id,
-      title: service.title,
-      type: 'service',
-      priceRange: service.priceRange,
-      schedule: service.schedule
-    });
-  };
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -299,12 +290,9 @@ export function ServiceDetailsPage({ serviceId, onNavigate, onOpenPayment }: Ser
 
               {/* Action Buttons */}
               <div className="flex gap-4">
-                <Button 
-                  className="flex-1"
-                  onClick={handleBookService}
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Agendar Serviço
+                <Button className="flex-1">
+                  <Phone className="w-4 h-4 mr-2" />
+                  Entrar em Contato
                 </Button>
                 <Button variant="outline">
                   Mais Informações
