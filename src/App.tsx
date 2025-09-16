@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
-import { Header } from './components/Header';
-import { HomePage } from './components/HomePage';
-import { RoomsPage } from './components/RoomsPage';
-import { RoomDetailsPage } from './components/RoomDetailsPage';
-import { ServicesPage } from './components/ServicesPage';
-import { ServiceDetailsPage } from './components/ServiceDetailsPage';
-import { AuthPages } from './components/AuthPages';
-import { Footer } from './components/Footer';
-import { PaymentPage } from './components/PaymentPage';
-import { UserProfilePage } from './components/UserProfilePage';
-import { MyReservationsPage } from './components/MyReservationsPage';
-import { PersonalInfoPage } from './components/PersonalInfoPage';
-import { MyTravelsPage } from './components/MyTravelsPage';
+import { Header, Footer } from './components';
+import {
+  HomePage,
+  RoomsPage,
+  RoomDetailsPage,
+  ServicesPage,
+  ServiceDetailsPage,
+  AuthPages,
+  PaymentPage,
+  UserProfilePage,
+  MyReservationsPage,
+  PersonalInfoPage,
+  MyTravelsPage
+} from './pages';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');

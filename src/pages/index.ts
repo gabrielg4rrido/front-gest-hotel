@@ -1,0 +1,14 @@
+// Page components exports
+export { HomePage } from './HomePage';
+export { RoomsPage } from './RoomsPage';
+export { RoomDetailsPage } from './RoomDetailsPage';
+export { ServicesPage } from './ServicesPage';
+export { ServiceDetailsPage } from './ServiceDetailsPage';
+export { AttractionsPage } from './AttractionsPage';
+export { AttractionDetailsPage } from './AttractionDetailsPage';
+export { AuthPages } from './AuthPages';
+export { PaymentPage } from './PaymentPage';
+export { UserProfilePage } from './UserProfilePage';
+export { MyReservationsPage } from './MyReservationsPage';
+export { MyTravelsPage } from './MyTravelsPage';
+export { PersonalInfoPage } from './PersonalInfoPage';
