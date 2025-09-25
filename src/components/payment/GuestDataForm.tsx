@@ -10,6 +10,7 @@ interface GuestData {
   totalGuests: number;
   firstName: string;
   lastName: string;
+  cpf: string;
   email: string;
   phone: string;
   isMainGuest: string;
@@ -37,8 +38,8 @@ export function GuestDataForm({ guestData, onGuestDataChange }: GuestDataFormPro
         {/* Quantidade de Hóspedes */}
         <div>
           <Label htmlFor="totalGuests">Quantidade de Hóspedes</Label>
-          <Select 
-            value={guestData.totalGuests.toString()} 
+          <Select
+            value={guestData.totalGuests.toString()}
             onValueChange={(value) => updateGuestData({ totalGuests: parseInt(value) })}
           >
             <SelectTrigger>
@@ -57,8 +58,8 @@ export function GuestDataForm({ guestData, onGuestDataChange }: GuestDataFormPro
         {/* Tipo de Reserva */}
         <div>
           <Label className="text-base mb-3 block">Você é o hóspede principal?</Label>
-          <RadioGroup 
-            value={guestData.isMainGuest} 
+          <RadioGroup
+            value={guestData.isMainGuest}
             onValueChange={(value) => updateGuestData({ isMainGuest: value })}
           >
             <div className="flex items-center space-x-2">
@@ -79,12 +80,12 @@ export function GuestDataForm({ guestData, onGuestDataChange }: GuestDataFormPro
         {/* Dados Pessoais */}
         <div className="space-y-4">
           <h4 className="font-semibold">
-            {guestData.isMainGuest === 'main' 
-              ? 'Seus dados pessoais' 
+            {guestData.isMainGuest === 'main'
+              ? 'Seus dados pessoais'
               : 'Dados do hóspede titular'
             }
           </h4>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="firstName">Nome</Label>
@@ -104,9 +105,30 @@ export function GuestDataForm({ guestData, onGuestDataChange }: GuestDataFormPro
                 onChange={(e) => updateGuestData({ lastName: e.target.value })}
               />
             </div>
-          </div>
 
-          <div>
+            <div>
+              <Label htmlFor="CPF">CPF</Label>
+              <Input
+                id="CPF"
+                type="CPF"
+                placeholder="xxx.xxx.xxx-xx"
+                value={guestData.cpf}
+                onChange={(e) => updateGuestData({ email: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="dataDeNascimento">Data de Nascimento</Label>
+              <Input
+                id="birthday"
+                type="date"
+                placeholder="dd / mm / aaaa"
+                className="w-full"
+                required
+                style={{ color: 'gray' }}
+              />
+            </div>
+
+            <div>
             <Label htmlFor="email">E-mail</Label>
             <Input
               id="email"
@@ -126,6 +148,9 @@ export function GuestDataForm({ guestData, onGuestDataChange }: GuestDataFormPro
               onChange={(e) => updateGuestData({ phone: e.target.value })}
             />
           </div>
+          </div>
+
+          
         </div>
       </CardContent>
     </Card>
