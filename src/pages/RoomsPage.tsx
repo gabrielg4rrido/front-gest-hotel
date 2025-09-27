@@ -5,6 +5,7 @@ import { Badge } from '../components/ui/badge';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { SearchForm } from '../components/SearchForm';
 import { Breadcrumb } from '../components/Breadcrumb';
+import { RoomFilterSidebar } from '../components/RoomFilterSideBar';
 import { Star } from 'lucide-react';
 
 interface RoomsPageProps {
@@ -32,6 +33,7 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
       name: 'Quarto Standard',
       description: 'Quarto confortável com todas as comodidades essenciais',
       price: 200,
+      // type: 'dorm' | 'private' | 'suite';
       priceDisplay: 'R$ 200',
       features: ['Wi-Fi gratuito', 'TV a cabo', 'Ar condicionado', 'Frigobar'],
       image: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400',
@@ -109,8 +111,47 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
     { label: 'Quartos', href: '#' }
   ];
 
+  const getRoomTypeName = (type: string) => {
+    switch (type) {
+      case 'dorm':
+        return 'Compartilhado';
+      case 'private':
+        return 'Privativo';
+      case 'suite':
+        return 'Suíte';
+      default:
+        return type;
+    }
+  };
+
+  const getRoomTypeColor = (type: string) => {
+    switch (type) {
+      case 'dorm':
+        return 'bg-blue-100 text-blue-800';
+      case 'private':
+        return 'bg-green-100 text-green-800';
+      case 'suite':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const [sortBy, setSortBy] = useState('price');
+  const [filterType, setFilterType] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+
+  const handleTypeFilter = (type: string, checked: boolean) => {
+  if (checked) {
+    setFilterType((prev) => [...prev, type]);
+  } else {
+    setFilterType((prev) => prev.filter((t) => t !== type));
+  }
+};
+
   return (
     <div className="min-h-screen bg-gray-50">
+              
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <Breadcrumb items={breadcrumbItems} />
@@ -125,7 +166,7 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
         </div>
 
         {/* Search Form */}
-        <div className="mb-12">
+        <div className="mb-12 ">
           <SearchForm onSearch={handleSearch} />
           {searchData && (
             <div className="mt-4 p-4 bg-blue-50 rounded-lg max-w-4xl mx-auto">
@@ -137,20 +178,25 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
         </div>
 
         {/* Rooms Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
+        <div className="flex flex-col items-center gap-8">
+          
           {rooms.map((room) => (
-            <Card key={room.id} className="overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full">
+            <Card 
+              key={room.id} 
+              className="w-full max-w-4xl overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full"
+            >
               <div className="aspect-video relative">
                 <ImageWithFallback
                   src={room.image}
                   alt={room.name}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 right-4">
-                  <Badge className="bg-primary text-white">
-                    {room.priceDisplay}/noite
-                  </Badge>
-                </div>
+                {/* <div className="absolute top-4 left-4">
+                    <Badge className={getRoomTypeColor(rooms.type)}>
+                      {getRoomTypeName(rooms.type)}
+                    </Badge>
+                </div> */}
+                
               </div>
               
               <CardHeader className="flex-shrink-0">
@@ -168,14 +214,27 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
               <CardContent className="flex flex-col flex-grow">
                 <div className="mb-4 flex-grow">
                   <h4 className="mb-2">Comodidades:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {room.features.map((feature, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {feature}
-                      </Badge>
-                    ))}
+
+                  <div className="flex justify-between items-start gap-4">
+                        <div className="flex flex-wrap gap-2">
+                          {room.features.map((feature, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {feature}
+                            </Badge>
+                           ))}
+                        </div>
+
+                        <div className="shrink-0">
+                            <Badge className="bg-white text-black text-3xl px-5 py-3 rounded-full">
+                              {room.priceDisplay}/noite
+                            </Badge>
+                        </div>
                   </div>
+
+                  
                 </div>
+
+                
                 
                 <div className="flex gap-2 mt-auto">
                   <Button 
@@ -207,7 +266,20 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
             Falar com Atendimento
           </Button>
         </div>
+        
+        
+        
       </div>
+    <div className="w-full lg:w-80 lg:pt-8 lg:pl-4 shrink-0">
+          <RoomFilterSidebar
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            filterType={filterType}
+            onTypeChange={handleTypeFilter}
+            priceRange={priceRange}
+          />
+        </div>
     </div>
+    
   );
 }
