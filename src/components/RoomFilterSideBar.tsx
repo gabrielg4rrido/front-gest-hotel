@@ -9,7 +9,6 @@ type RoomFilterSidebarProps = {
   onSortChange: (value: string) => void;
   filterType: string[];
   onTypeChange: (type: string, checked: boolean) => void;
-  priceRange: [number, number];
 };
 
 export function RoomFilterSidebar({
@@ -17,8 +16,8 @@ export function RoomFilterSidebar({
   onSortChange,
   filterType,
   onTypeChange,
-  priceRange,
 }: RoomFilterSidebarProps) {
+
   const getRoomTypeName = (type: string) => {
     switch (type) {
       case 'dorm':
@@ -33,7 +32,7 @@ export function RoomFilterSidebar({
   };
 
   return (
-        <aside className="space-y-6">
+        <aside className="w-64 h-fit">
       <Card>
         <CardHeader>
           <CardTitle>Filtros</CardTitle>
@@ -73,16 +72,6 @@ export function RoomFilterSidebar({
                 </div>
               ))}
             </div>
-          </div>
-
-          <Separator />
-
-          {/* Price Range */}
-          <div>
-            <h4 className="mb-3">Faixa de Preço</h4>
-            <p className="text-sm text-muted-foreground">
-              R$ {priceRange[0]} - R$ {priceRange[1]} por noite
-            </p>
           </div>
         </CardContent>
       </Card>
