@@ -32,7 +32,8 @@ export function RoomFilterSidebar({
   };
 
   return (
-        <aside className="w-64 h-fit">
+    <div className="flex flex-col sm:flex-row gap-4">
+      <aside className="w-full max-w-[450px] lg:w-[200px] lg:min-w-[200px] lg:max-w-none">
       <Card>
         <CardHeader>
           <CardTitle>Filtros</CardTitle>
@@ -58,9 +59,9 @@ export function RoomFilterSidebar({
           {/* Room Type */}
           <div>
             <h4 className="mb-3">Tipo de Quarto</h4>
-            <div className="space-y-3">
+            <div className="flex flex-row flex-wrap gap-1 sm:flex-col sm:gap-0 sm:space-y-3">
               {['dorm', 'private', 'suite'].map((type) => (
-                <div key={type} className="flex items-center space-x-2">
+                <div key={type} className="flex items-center space-x-1">
                   <Checkbox
                     id={type}
                     checked={filterType.includes(type)}
@@ -76,5 +77,7 @@ export function RoomFilterSidebar({
         </CardContent>
       </Card>
     </aside>   
+    </div>
+        
   );
 }

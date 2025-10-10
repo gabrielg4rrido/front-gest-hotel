@@ -21,7 +21,7 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
 
   // Dados dos quartos expandidos
   const roomsData = {
-    1: {
+    2: {
       name: 'Quarto Standard',
       description: 'Nosso quarto Standard oferece todo o conforto necessário para uma estadia agradável. Com decoração moderna e mobiliário de qualidade, é a escolha perfeita para viajantes que buscam praticidade e bom custo-benefício.',
       price: 200,
@@ -34,7 +34,6 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
         'Smart TV 43" com canais a cabo',
         'Ar condicionado individual',
         'Frigobar',
-        'Cofre digital',
         'Secador de cabelo',
         'Kit amenities',
         'Serviço de quarto 24h'
@@ -53,7 +52,7 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
       rating: 4.2,
       reviews: 128
     },
-    2: {
+    3: {
       name: 'Quarto Deluxe',
       description: 'O Quarto Deluxe oferece mais espaço e conforto, com uma decoração sofisticada e vista parcial para o mar. Perfeito para casais em lua de mel ou viajantes que desejam um pouco mais de luxo em sua estadia.',
       price: 350,
@@ -67,11 +66,9 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
         'Ar condicionado individual',
         'Frigobar premium',
         'Varanda com vista parcial do mar',
-        'Cofre digital',
         'Roupão e chinelos',
         'Kit amenities premium',
         'Serviço de quarto 24h',
-        'Máquina de café Nespresso'
       ],
       amenities: [
         { icon: Wifi, name: 'Wi-Fi gratuito' },
@@ -88,7 +85,7 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
       rating: 4.5,
       reviews: 89
     },
-    3: {
+    4: {
       name: 'Suíte Premium',
       description: 'Nossa Suíte Premium é o ápice do luxo e conforto. Com vista completa para o mar, jacuzzi privativa e acabamentos de primeira qualidade, oferece uma experiência verdadeiramente exclusiva.',
       price: 500,
@@ -126,7 +123,7 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
       rating: 4.8,
       reviews: 156
     },
-    4: {
+    5: {
       name: 'Suíte Presidencial',
       description: 'A Suíte Presidencial representa o que há de mais exclusivo em hospedagem. Com sala de estar separada, serviços VIP personalizados e vistas panorâmicas, é perfeita para ocasiões especiais.',
       price: 800,
@@ -148,8 +145,6 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
         'Serviço de quarto 24h VIP',
         'Máquina de café profissional',
         'Check-in/out privativo',
-        'Concierge personalizado',
-        'Transfer gratuito'
       ],
       amenities: [
         { icon: Wifi, name: 'Wi-Fi gratuito' },
