@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { BookingSummary, GuestDataForm, AdditionalServices, PaymentForm } from '../components/payment';
 
@@ -26,83 +26,62 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     expiry: '',
     cvv: ''
   });
-  
-  // Estados para dados do hóspede
+
+  // Estado para dados do hóspede (mock)
   const [guestData, setGuestData] = useState({
     totalGuests: bookingData?.guests || 2,
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    isMainGuest: 'main' // 'main' ou 'other'
+    isMainGuest: 'main'
   });
 
-  // Estados para serviços adicionais
+  // Estado para serviços adicionais (única parte dinâmica)
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  
-  const additionalServices = [
-    {
-      id: 'restaurant',
-      name: 'Restaurante Gourmet',
-      description: 'Acesso ao restaurante com desconto de 15%',
-      price: 0,
-      icon: '🍽️'
-    },
-    {
-      id: 'spa',
-      name: 'Spa & Wellness',
-      description: 'Pacote completo com massagem relaxante',
-      price: 250,
-      icon: '💆'
-    },
-    {
-      id: 'gym',
-      name: 'Academia Premium',
-      description: 'Acesso ilimitado + personal trainer',
-      price: 100,
-      icon: '💪'
-    },
-    {
-      id: 'concierge',
-      name: 'Concierge 24h',
-      description: 'Atendimento personalizado durante a estadia',
-      price: 150,
-      icon: '🎩'
-    },
-    {
-      id: 'transfer',
-      name: 'Transfer Aeroporto',
-      description: 'Transfer ida e volta do aeroporto',
-      price: 120,
-      icon: '✈️'
-    },
-    {
-      id: 'laundry',
-      name: 'Lavanderia Express',
-      description: 'Serviço de lavanderia premium',
-      price: 80,
-      icon: '👔'
-    }
-  ];
+  const [additionalServices, setAdditionalServices] = useState<any[]>([]);
+
+  // 🔹 SOMENTE ESSA PARTE SE CONECTA AO BANCO
+  useEffect(() => {
+    fetch("http://localhost:3001/api/additional-services")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Serviços adicionais recebidos:", data);
+        const formatted = data.map((item: any) => ({
+          id: String(item.id),
+          name: item.titulo,
+          description: item.descricao,
+          price: Number(item.preco) || 0, // 🔥 garante número
+          icon:
+            item.titulo === "Restaurante Gourmet" ? "🍽️" :
+              item.titulo === "Spa & Wellness" ? "💆" :
+                item.titulo === "Academia Premium" ? "💪" :
+                  item.titulo === "Concierge 24h" ? "🎩" :
+                    item.titulo === "Transfer Aeroporto" ? "✈️" :
+                      item.titulo === "Lavanderia Express" ? "👔" :
+                        "⭐",
+
+        }));
+
+        setAdditionalServices(formatted);
+      })
+      .catch((err) => console.error("Erro ao buscar serviços adicionais:", err));
+  }, []);
 
   const handleServiceToggle = (serviceId: string) => {
-    setSelectedServices(prev => 
-      prev.includes(serviceId) 
+    setSelectedServices(prev =>
+      prev.includes(serviceId)
         ? prev.filter(id => id !== serviceId)
         : [...prev, serviceId]
     );
   };
 
-  // Get booking data from props or sessionStorage
+  // Mock de dados da reserva
   const getBookingData = () => {
     if (bookingData) return bookingData;
-    
     const sessionData = sessionStorage.getItem('paymentData');
-    if (sessionData) {
-      return JSON.parse(sessionData);
-    }
-    
-    // Default booking data if none provided
+    if (sessionData) return JSON.parse(sessionData);
+
     return {
       type: 'room' as const,
       name: 'Quarto Deluxe',
@@ -116,7 +95,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
   };
 
   const booking = getBookingData();
-  
+
   const calculateDays = () => {
     if (booking.dates) {
       const checkIn = new Date(booking.dates.checkIn);
@@ -133,7 +112,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     return acc + (service?.price || 0);
   }, 0);
   const subtotal = roomSubtotal + servicesSubtotal;
-  const taxes = subtotal * 0.12; // 12% de impostos
+  const taxes = subtotal * 0.12;
   const total = subtotal + taxes;
 
   const installmentOptions = [
@@ -145,30 +124,30 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
   ];
 
   const handlePayment = () => {
-    // Validar dados do hóspede
     if (!guestData.firstName || !guestData.lastName || !guestData.email || !guestData.phone) {
       alert('Por favor, preencha todos os dados do hóspede.');
       return;
     }
-
-    // Simular processamento do pagamento
-    alert(`Pagamento processado com sucesso para ${guestData.firstName} ${guestData.lastName}! Você receberá a confirmação por email.`);
+    alert(`Pagamento processado com sucesso para ${guestData.firstName} ${guestData.lastName}!`);
     onNavigate('home');
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-6xl">
+        {/* Cabeçalho */}
         <div className="mb-8">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={() => onNavigate('home')}
             className="mb-4"
           >
             ← Voltar
           </Button>
           <h1 className="text-3xl mb-2">Finalizar Reserva</h1>
-          <p className="text-gray-600">Complete os dados do hóspede e pagamento para confirmar sua reserva</p>
+          <p className="text-gray-600">
+            Complete os dados do hóspede e pagamento para confirmar sua reserva
+          </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -186,20 +165,20 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            {/* Dados do Hóspede */}
+            {/* Dados do Hóspede (mock) */}
             <GuestDataForm
               guestData={guestData}
               onGuestDataChange={setGuestData}
             />
 
-            {/* Serviços Adicionais */}
+            {/* 🔹 Serviços Adicionais (dados reais do banco) */}
             <AdditionalServices
               additionalServices={additionalServices}
               selectedServices={selectedServices}
               onServiceToggle={handleServiceToggle}
             />
 
-            {/* Dados do Pagamento */}
+            {/* Dados do Pagamento (mock) */}
             <PaymentForm
               paymentMethod={paymentMethod}
               installments={installments}
