@@ -38,6 +38,10 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
   const [sortBy, setSortBy] = useState('price');
   const [filterType, setFilterType] = useState<string[]>([]);
 
+  const [rooms, setRooms] = useState<String[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     // Get search data from sessionStorage if available
     const savedSearch = sessionStorage.getItem('hotelSearch');
@@ -46,81 +50,50 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
     } 
   }, []);
 
-  const rooms = [
-    {
-      id: 1,
-      name: 'Dormitório Compartilhado', 
-      description: 'Quarto compartilhado econômico com beliches',
-      price: 100,
-      priceDisplay: 'R$ 100',
-      type: 'dorm' as const, 
-      capacity: 8, 
-      features: ['Wi-Fi gratuito', 'Armários individuais', 'Banheiro compartilhado'],
-      image: 'https://images.unsplash.com/photo-1709805619372-40de3f158e83?h=250',
-    },
-    {
-      id: 2,
-      name: 'Quarto Standard',
-      description: 'Quarto confortável com todas as comodidades essenciais',
-      price: 200,
-      priceDisplay: 'R$ 200',
-      type: 'private' as const, 
-      capacity: 2, 
-      features: ['Wi-Fi gratuito', 'TV a cabo', 'Ar condicionado', 'Frigobar'],
-      image: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?h=250',
-      rating: 4.2,
-      reviews: 128
-    },
-    {
-      id: 3,
-      name: 'Quarto Deluxe',
-      description: 'Quarto espaçoso com vista parcial para o mar',
-      price: 350,
-      priceDisplay: 'R$ 350',
-      type: 'private' as const, 
-      capacity: 2, 
-      features: ['Wi-Fi gratuito', 'Smart TV', 'Ar condicionado', 'Frigobar', 'Varanda'],
-      image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400',
-      rating: 4.5,
-      reviews: 89
-    },
-    {
-      id: 4,
-      name: 'Suíte Premium',
-      description: 'Suíte luxuosa com vista completa para o mar',
-      price: 500,
-      priceDisplay: 'R$ 500',
-      type: 'suite' as const, 
-      capacity: 4, 
-      features: ['Wi-Fi gratuito', 'Smart TV', 'Ar condicionado', 'Frigobar', 'Varanda', 'Jacuzzi'],
-      image: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=400',
-      rating: 4.8,
-      reviews: 156
-    },
-    {
-      id: 5,
-      name: 'Suíte Presidencial',
-      description: 'Nossa melhor acomodação com serviços VIP',
-      price: 800,
-      priceDisplay: 'R$ 800',
-      type: 'suite' as const, 
-      capacity: 4, 
-      features: ['Wi-Fi gratuito', 'Smart TV', 'Ar condicionado', 'Frigobar', 'Varanda', 'Jacuzzi', 'Sala de estar'],
-      image: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=400',
-      rating: 4.9,
-      reviews: 73
+   const fetchRooms = async (searchParams?: {
+    checkIn?: string;
+    checkOut?: string;
+    guests?: number;
+  }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // AJUSTE AQUI: Mude para o URL da sua API (ex: http://seu-servidor:porta/api/rooms)
+      let url = 'http://localhost:3001/api/rooms'; // Exemplo de endpoint
+      // Se houver searchParams, adicione como query params na URL (para filtro de disponibilidade)
+      if (searchParams) {
+        const params = new URLSearchParams();
+        if (searchParams.checkIn) params.append('checkIn', searchParams.checkIn);
+        if (searchParams.checkOut) params.append('checkOut', searchParams.checkOut);
+        if (searchParams.guests) params.append('guests', searchParams.guests.toString());
+        url += `?${params.toString()}`;
+      }
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Erro ao buscar quartos');
+      }
+      const data: Room[] = await response.json();
+      setRooms(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      setRooms([]); // Limpa a lista em caso de erro
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  // Função para simular disponibilidade baseada em searchData
-  // Só id 5 disponível quando há searchData (para teste)
-  // Na real, chame uma API aqui
+  useEffect(() => {
+    fetchRooms(); // Busca todos os quartos inicialmente
+  }, []);
+
+  // ATUALIZADO: Função para simular disponibilidade (mockada por enquanto)
+  // Na real, remova isso e use a API para filtrar (veja fetchRooms acima)
   const isRoomAvailable = (roomId: number, checkIn?: string, checkOut?: string): boolean => {
     if (!checkIn || !checkOut) {
       return true; // Sem busca: todos disponíveis
     }
     // Simulação: Só Suíte Presidencial (id 5) disponível para qualquer período
-    // Para realismo futuro: Verifique se checkIn é > data atual (ex: new Date(checkIn) > new Date())
+    // TODO: Integre com API real — chame um endpoint como /api/rooms/{id}/availability
     return roomId === 5;
   };
 
@@ -132,9 +105,11 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
   }) => {
     setSearchData(newSearchData);
     sessionStorage.setItem('hotelSearch', JSON.stringify(newSearchData));
+    // NOVO: Recarrega quartos da API com os parâmetros de busca (para disponibilidade real)
+    fetchRooms(newSearchData);
   };
 
-  const handleReserve = (room: typeof rooms[0]) => {
+  const handleReserve = (room: Room) => {
     if (searchData) {
       // Navigate to payment with room and search data
       const paymentData = {
@@ -196,7 +171,7 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
           return 0;
       }
     });
-  }, [rooms, filterType, sortBy]);
+  }, [rooms, filterType, sortBy, searchData]);
 
     // Função auxiliar para obter status do quarto (para badge)
   const getRoomStatus = (room: Room) => {
@@ -206,6 +181,25 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
       variant: available ? 'default' : 'destructive' // Verde/padrão para disponível, vermelho para indisponível
     };
   };
+
+  // NOVO: Renderiza loading ou erro
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-lg">Carregando quartos...</p>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Erro: {error}</p>
+          <Button onClick={() => fetchRooms()}>Tentar Novamente</Button>
+        </div>
+      </div>
+    );
+  }
    
 
   return (
@@ -224,7 +218,7 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
             filterType={filterType}
             onTypeChange={handleTypeFilter}
           />
-
+            {/* TRANSFORMAR EM COMPONENT */}
           <div className=""> {/* min-w-0 para evitar expansão no flex */}
             
             {/* Header - Largura fixa e centralizada */}
@@ -353,6 +347,7 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
                     onClick={() => {
                       setFilterType([]);
                       setSortBy('price');
+                      fetchRooms();
                     }}
                     className="mt-4"
                   >
