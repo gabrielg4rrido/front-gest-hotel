@@ -1,8 +1,8 @@
-import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
-import { Separator } from './ui/separator';
-import { Checkbox } from './ui/checkbox';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
 import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
+import { Separator } from '../ui/separator';
+import { Checkbox } from '../ui/checkbox';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select';
 
 type RoomFilterSidebarProps = {
   sortBy: string;
@@ -65,7 +65,7 @@ export function RoomFilterSidebar({
                   <Checkbox
                     id={type}
                     checked={filterType.includes(type)}
-                    onCheckedChange={(checked) => onTypeChange(type, checked as boolean)}
+                    onCheckedChange={(checked: boolean) => onTypeChange(type, checked as boolean)}
                   />
                   <label htmlFor={type} className="text-sm">
                     {getRoomTypeName(type)}

@@ -5,19 +5,19 @@ import { ChevronRight, Home } from 'lucide-react';
 interface BreadcrumbItem {
   label: string;
   page?: string;
-  roomId?: number;
+  roomId?: string;
   href?: string;
   onClick?: () => void;
 }
 
 interface BreadcrumbProps {
   items: BreadcrumbItem[];
-  onNavigate?: (page: string, roomId?: number) => void;
+  onNavigate?: (page: string, roomId?: string) => void;
 }
 
 export function Breadcrumb({ items, onNavigate }: BreadcrumbProps) {
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
+    <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
       <Button
         variant="ghost"
         size="sm"

@@ -1,180 +1,124 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { ImageGallery } from '../components/ImageGallery';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { ArrowLeft, Wifi, Car, Coffee, Utensils, Waves, Dumbbell, Flower, Users, Bed, Bath, Square, Star, Phone, MessageCircle } from 'lucide-react';
 
+// --- INTERFACES E TIPOS ---
+
+// Interface para os dados que vêm da sua API (banco de dados)
+interface ApiRoom {
+  id: string; // UUID vindo do banco
+  name: string;
+  description: string; // Pode vir do banco, mas o mock irá sobrescrever se existir
+  price: number;
+  capacity: number;
+}
+
+// Interface para as props do componente, com roomId como string (UUID)
 interface RoomDetailsPageProps {
-  roomId: number;
-  onNavigate: (page: string, roomId?: number) => void;
+  roomId: string; 
+  onNavigate: (page: string, roomId?: string) => void;
   onOpenPayment: (type: 'room' | 'service', data: any) => void;
 }
 
+// --- DADOS MOCKADOS ---
+
+// Objeto com os detalhes estáticos e ricos.
+// As chaves devem ser os UUIDs REAIS dos seus quartos no banco de dados.
+const mockDetailsData = {
+  // Exemplo de UUID para o 'Quarto Standard'. Substitua pelo seu UUID real.
+  'qqs215-005056a4845d': {
+    description: 'Nosso quarto Standard oferece todo o conforto necessário para uma estadia agradável. Com decoração moderna e mobiliário de qualidade, é a escolha perfeita para viajantes que buscam praticidade e bom custo-benefício.',
+    area: '25m²',
+    beds: '1 cama de casal',
+    bathroom: '1 banheiro privativo',
+    features: [ 'Wi-Fi gratuito de alta velocidade', 'Smart TV 43" com canais a cabo', 'Ar condicionado individual', 'Frigobar', 'Secador de cabelo', 'Kit amenities', 'Serviço de quarto 24h' ],
+    amenities: [ { icon: Wifi, name: 'Wi-Fi gratuito' }, { icon: Car, name: 'Estacionamento' }, { icon: Coffee, name: 'Café da manhã' }, { icon: Utensils, name: 'Restaurante' } ],
+    images: [ 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800', 'https://images.unsplash.com/photo-1632598024410-3d8f24daab57?w=800', 'https://images.unsplash.com/photo-1678924133506-7508daa13c7c?w=800' ],
+    rating: 4.2,
+    reviews: 128
+  },
+  // Exemplo para 'Suíte Presidencial'. Substitua pelo seu UUID real.
+  'qqd320-005056a4845d': {
+    description: 'A Suíte Presidencial representa o que há de mais exclusivo em hospedagem. Com sala de estar separada, serviços VIP personalizados e vistas panorâmicas, é perfeita para ocasiões especiais.',
+    area: '80m²',
+    beds: '1 cama king size + sala com sofá-cama',
+    bathroom: '2 banheiros com jacuzzi',
+    features: [ 'Wi-Fi gratuito de alta velocidade', 'Smart TV 75" + TV adicional na sala', 'Ar condicionado individual', 'Frigobar premium totalmente abastecido', 'Varanda panorâmica com vista 360°', 'Jacuzzi com vista para o mar', 'Sala de estar separada', 'Cofre digital grande', 'Roupões e chinelos de luxo', 'Kit amenities exclusivo', 'Serviço de quarto 24h VIP', 'Máquina de café profissional', 'Check-in/out privativo', ],
+    amenities: [ { icon: Wifi, name: 'Wi-Fi gratuito' }, { icon: Car, name: 'Valet parking' }, { icon: Coffee, name: 'Café da manhã VIP' }, { icon: Utensils, name: 'Restaurante VIP' }, { icon: Waves, name: 'Vista panorâmica' }, { icon: Flower, name: 'Spa premium' }, { icon: Dumbbell, name: 'Academia' } ],
+    images: [ 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800', 'https://images.unsplash.com/photo-1685300077128-ca33b07cc561?w=800', 'https://images.unsplash.com/photo-1632598024410-3d8f24daab57?w=800', 'https://images.unsplash.com/photo-1678924133506-7508daa13c7c?w=800' ],
+    rating: 4.9,
+    reviews: 73
+  }
+  // Adicione os outros quartos aqui, usando seus UUIDs como chaves
+};
+
+// --- COMPONENTE PRINCIPAL ---
+
 export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetailsPageProps) {
+  // Estados para gerenciar os dados, o carregamento e possíveis erros
+  const [room, setRoom] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  console.log('ID do quarto recebido:', roomId);
 
-  // Dados dos quartos expandidos
-  const roomsData = {
-    2: {
-      name: 'Quarto Standard',
-      description: 'Nosso quarto Standard oferece todo o conforto necessário para uma estadia agradável. Com decoração moderna e mobiliário de qualidade, é a escolha perfeita para viajantes que buscam praticidade e bom custo-benefício.',
-      price: 200,
-      area: '25m²',
-      capacity: 2,
-      beds: '1 cama de casal',
-      bathroom: '1 banheiro privativo',
-      features: [
-        'Wi-Fi gratuito de alta velocidade',
-        'Smart TV 43" com canais a cabo',
-        'Ar condicionado individual',
-        'Frigobar',
-        'Secador de cabelo',
-        'Kit amenities',
-        'Serviço de quarto 24h'
-      ],
-      amenities: [
-        { icon: Wifi, name: 'Wi-Fi gratuito' },
-        { icon: Car, name: 'Estacionamento' },
-        { icon: Coffee, name: 'Café da manhã' },
-        { icon: Utensils, name: 'Restaurante' }
-      ],
-      images: [
-        'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800',
-        'https://images.unsplash.com/photo-1632598024410-3d8f24daab57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMHJvb20lMjBpbnRlcmlvcnxlbnwxfHx8fDE3NTY3OTg5NjN8MA&ixlib=rb-4.1.0&q=80&w=800',
-        'https://images.unsplash.com/photo-1678924133506-7508daa13c7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3RlbCUyMHJvb20lMjBiYXRocm9vbSUyMG1vZGVybnxlbnwxfHx8fDE3NTY4MzUzNzV8MA&ixlib=rb-4.1.0&q=80&w=800'
-      ],
-      rating: 4.2,
-      reviews: 128
-    },
-    3: {
-      name: 'Quarto Deluxe',
-      description: 'O Quarto Deluxe oferece mais espaço e conforto, com uma decoração sofisticada e vista parcial para o mar. Perfeito para casais em lua de mel ou viajantes que desejam um pouco mais de luxo em sua estadia.',
-      price: 350,
-      area: '35m²',
-      capacity: 3,
-      beds: '1 cama de casal + 1 sofá-cama',
-      bathroom: '1 banheiro com banheira',
-      features: [
-        'Wi-Fi gratuito de alta velocidade',
-        'Smart TV 55" com streaming',
-        'Ar condicionado individual',
-        'Frigobar premium',
-        'Varanda com vista parcial do mar',
-        'Roupão e chinelos',
-        'Kit amenities premium',
-        'Serviço de quarto 24h',
-      ],
-      amenities: [
-        { icon: Wifi, name: 'Wi-Fi gratuito' },
-        { icon: Car, name: 'Estacionamento' },
-        { icon: Coffee, name: 'Café da manhã' },
-        { icon: Utensils, name: 'Restaurante' },
-        { icon: Waves, name: 'Vista do mar' }
-      ],
-      images: [
-        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800',
-        'https://images.unsplash.com/photo-1685300077128-ca33b07cc561?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3RlbCUyMHJvb20lMjBiYWxjb255JTIwb2NlYW4lMjB2aWV3fGVufDF8fHx8MTc1NjgzNTM3OHww&ixlib=rb-4.1.0&q=80&w=800',
-        'https://images.unsplash.com/photo-1632598024410-3d8f24daab57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMHJvb20lMjBpbnRlcmlvcnxlbnwxfHx8fDE3NTY3OTg5NjN8MA&ixlib=rb-4.1.0&q=80&w=800'
-      ],
-      rating: 4.5,
-      reviews: 89
-    },
-    4: {
-      name: 'Suíte Premium',
-      description: 'Nossa Suíte Premium é o ápice do luxo e conforto. Com vista completa para o mar, jacuzzi privativa e acabamentos de primeira qualidade, oferece uma experiência verdadeiramente exclusiva.',
-      price: 500,
-      area: '50m²',
-      capacity: 4,
-      beds: '1 cama king size + sofá-cama',
-      bathroom: '1 banheiro com jacuzzi',
-      features: [
-        'Wi-Fi gratuito de alta velocidade',
-        'Smart TV 65" com streaming',
-        'Ar condicionado individual',
-        'Frigobar premium com bebidas inclusas',
-        'Varanda ampla com vista completa do mar',
-        'Jacuzzi privativa',
-        'Cofre digital',
-        'Roupão e chinelos premium',
-        'Kit amenities de luxo',
-        'Serviço de quarto 24h',
-        'Máquina de café premium',
-        'Check-in/out express'
-      ],
-      amenities: [
-        { icon: Wifi, name: 'Wi-Fi gratuito' },
-        { icon: Car, name: 'Estacionamento VIP' },
-        { icon: Coffee, name: 'Café da manhã premium' },
-        { icon: Utensils, name: 'Restaurante' },
-        { icon: Waves, name: 'Vista completa do mar' },
-        { icon: Flower, name: 'Spa access' }
-      ],
-      images: [
-        'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800',
-        'https://images.unsplash.com/photo-1685300077128-ca33b07cc561?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3RlbCUyMHJvb20lMjBiYWxjb255JTIwb2NlYW4lMjB2aWV3fGVufDF8fHx8MTc1NjgzNTM3OHww&ixlib=rb-4.1.0&q=80&w=800',
-        'https://images.unsplash.com/photo-1632598024410-3d8f24daab57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMHJvb20lMjBpbnRlcmlvcnxlbnwxfHx8fDE3NTY3OTg5NjN8MA&ixlib=rb-4.1.0&q=80&w=800'
-      ],
-      rating: 4.8,
-      reviews: 156
-    },
-    5: {
-      name: 'Suíte Presidencial',
-      description: 'A Suíte Presidencial representa o que há de mais exclusivo em hospedagem. Com sala de estar separada, serviços VIP personalizados e vistas panorâmicas, é perfeita para ocasiões especiais.',
-      price: 800,
-      area: '80m²',
-      capacity: 6,
-      beds: '1 cama king size + sala com sofá-cama',
-      bathroom: '2 banheiros com jacuzzi',
-      features: [
-        'Wi-Fi gratuito de alta velocidade',
-        'Smart TV 75" + TV adicional na sala',
-        'Ar condicionado individual',
-        'Frigobar premium totalmente abastecido',
-        'Varanda panorâmica com vista 360°',
-        'Jacuzzi com vista para o mar',
-        'Sala de estar separada',
-        'Cofre digital grande',
-        'Roupões e chinelos de luxo',
-        'Kit amenities exclusivo',
-        'Serviço de quarto 24h VIP',
-        'Máquina de café profissional',
-        'Check-in/out privativo',
-      ],
-      amenities: [
-        { icon: Wifi, name: 'Wi-Fi gratuito' },
-        { icon: Car, name: 'Valet parking' },
-        { icon: Coffee, name: 'Café da manhã VIP' },
-        { icon: Utensils, name: 'Restaurante VIP' },
-        { icon: Waves, name: 'Vista panorâmica' },
-        { icon: Flower, name: 'Spa premium' },
-        { icon: Dumbbell, name: 'Academia' }
-      ],
-      images: [
-        'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800',
-        'https://images.unsplash.com/photo-1685300077128-ca33b07cc561?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3RlbCUyMHJvb20lMjBiYWxjb255JTIwb2NlYW4lMjB2aWV3fGVufDF8fHx8MTc1NjgzNTM3OHww&ixlib=rb-4.1.0&q=80&w=800',
-        'https://images.unsplash.com/photo-1632598024410-3d8f24daab57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMHJvb20lMjBpbnRlcmlvcnxlbnwxfHx8fDE3NTY3OTg5NjN8MA&ixlib=rb-4.1.0&q=80&w=800',
-        'https://images.unsplash.com/photo-1678924133506-7508daa13c7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3RlbCUyMHJvb20lMjBiYXRocm9vbSUyMG1vZGVybnxlbnwxfHx8fDE3NTY4MzUzNzV8MA&ixlib=rb-4.1.0&q=80&w=800'
-      ],
-      rating: 4.9,
-      reviews: 73
-    }
-  };
+  // Hook para buscar os dados da API quando o componente é montado ou o roomId muda
+  useEffect(() => {
+    const fetchRoomDetails = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // 1. Busca os dados dinâmicos da sua API
+        const response = await fetch(`http://localhost:3001/api/rooms/${roomId}`); // Ajuste a URL se necessário
+        if (!response.ok) {
+          throw new Error('Quarto não encontrado ou falha na comunicação com o servidor.');
+        }
+        const apiRoomData: ApiRoom = await response.json();
 
-  const room = roomsData[roomId as keyof typeof roomsData];
+        // 2. Busca os dados estáticos (mock) correspondentes ao UUID
+        const mockRoomDetails = mockDetailsData[roomId as keyof typeof mockDetailsData];
 
-  if (!room) {
+        // 3. Mescla os dados da API com os dados mockados
+        // A ordem é importante: os dados do mock (mockRoomDetails) sobrescreverão
+        // qualquer campo com o mesmo nome que venha da API (apiRoomData).
+        const finalRoomData = {
+          ...apiRoomData,
+          ...mockRoomDetails,
+        };
+
+        setRoom(finalRoomData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Ocorreu um erro desconhecido.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRoomDetails();
+  }, [roomId]); // A dependência [roomId] garante que a busca seja refeita se o usuário navegar para outro quarto
+
+  // --- RENDERIZAÇÃO CONDICIONAL ---
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-lg">Carregando detalhes do quarto...</p>
+      </div>
+    );
+  }
+
+  if (error || !room) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl mb-4">Quarto não encontrado</h1>
+          <h1 className="text-2xl mb-4">{error || 'Quarto não encontrado'}</h1>
           <Button onClick={() => onNavigate('rooms')}>
-            Voltar aos Quartos
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar para a lista de quartos
           </Button>
         </div>
       </div>
@@ -188,11 +132,14 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
       guests: room.capacity
     });
   };
+  
+  // --- RENDERIZAÇÃO PRINCIPAL ---
+  // O JSX abaixo permanece praticamente o mesmo, pois agora ele lê
+  // os dados do objeto `room` do estado, que já contém os dados mesclados.
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
         <Breadcrumb
           items={[
             { label: 'Quartos', page: 'rooms' },
@@ -201,14 +148,12 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
           onNavigate={onNavigate}
         />
 
-        {/* Galeria de Imagens */}
         <Card className="overflow-hidden mb-8">
           <CardContent className="p-6">
-            <ImageGallery images={room.images} title={room.name} />
+            <ImageGallery images={room.images || []} title={room.name} />
           </CardContent>
         </Card>
 
-        {/* Informações do Quarto */}
         <Card className="mb-8">
           <CardHeader>
             <div className="flex justify-between items-start">
@@ -217,17 +162,10 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
                 <div className="flex items-center gap-2 mt-2">
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < Math.floor(room.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                        }`}
-                      />
+                      <Star key={i} className={`w-4 h-4 ${i < Math.floor(room.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
                     ))}
                   </div>
-                  <span className="text-sm text-gray-600">
-                    {room.rating} ({room.reviews} avaliações)
-                  </span>
+                  <span className="text-sm text-gray-600">{room.rating} ({room.reviews} avaliações)</span>
                 </div>
               </div>
               <div className="text-right">
@@ -238,49 +176,27 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
           </CardHeader>
           <CardContent>
             <p className="text-gray-700 mb-6">{room.description}</p>
-
-            {/* Informações Básicas */}
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="flex items-center gap-2">
-                <Square className="w-5 h-5 text-gray-600" />
-                <span>{room.area}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-gray-600" />
-                <span>Até {room.capacity} pessoas</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Bed className="w-5 h-5 text-gray-600" />
-                <span>{room.beds}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Bath className="w-5 h-5 text-gray-600" />
-                <span>{room.bathroom}</span>
-              </div>
+              <div className="flex items-center gap-2"><Square className="w-5 h-5 text-gray-600" /><span>{room.area}</span></div>
+              <div className="flex items-center gap-2"><Users className="w-5 h-5 text-gray-600" /><span>Até {room.capacity} pessoas</span></div>
+              <div className="flex items-center gap-2"><Bed className="w-5 h-5 text-gray-600" /><span>{room.beds}</span></div>
+              <div className="flex items-center gap-2"><Bath className="w-5 h-5 text-gray-600" /><span>{room.bathroom}</span></div>
             </div>
 
-            {/* Comodidades */}
             <div className="mb-6">
               <h3 className="text-xl mb-3">Comodidades Incluídas</h3>
               <div className="grid md:grid-cols-2 gap-2">
-                {room.features.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span className="text-sm">{feature}</span>
-                  </div>
+                {room.features.map((feature: string, index: number) => (
+                  <div key={index} className="flex items-center gap-2"><div className="w-2 h-2 bg-primary rounded-full"></div><span className="text-sm">{feature}</span></div>
                 ))}
               </div>
             </div>
 
-            {/* Serviços do Hotel */}
             <div>
               <h3 className="text-xl mb-3">Serviços do Hotel</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {room.amenities.map((amenity, index) => (
-                  <div key={index} className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
-                    <amenity.icon className="w-6 h-6 text-primary mb-2" />
-                    <span className="text-sm">{amenity.name}</span>
-                  </div>
+                {room.amenities.map((amenity: { icon: React.ElementType, name: string }, index: number) => (
+                  <div key={index} className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg"><amenity.icon className="w-6 h-6 text-primary mb-2" /><span className="text-sm">{amenity.name}</span></div>
                 ))}
               </div>
             </div>
@@ -358,66 +274,9 @@ export function RoomDetailsPage({ roomId, onNavigate, onOpenPayment }: RoomDetai
             </div>
           </CardContent>
         </Card>
-
-        {/* Seção de Avaliações */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Avaliações dos Hóspedes</CardTitle>
-              <div className="flex items-center gap-2">
-                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                <span>{room.rating} de 5</span>
-                <span className="text-gray-500">({room.reviews} avaliações)</span>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {/* Sample Reviews */}
-            <div className="space-y-6">
-              {[
-                {
-                  name: 'Carlos Mendes',
-                  rating: 5,
-                  comment: 'Quarto excelente! Muito limpo e confortável. A vista é maravilhosa.',
-                  date: '20 de agosto, 2024'
-                },
-                {
-                  name: 'Marina Santos',
-                  rating: 4,
-                  comment: 'Gostei muito da estadia. O quarto é espaçoso e bem equipado.',
-                  date: '15 de agosto, 2024'
-                },
-                {
-                  name: 'Roberto Silva',
-                  rating: 5,
-                  comment: 'Perfeito para uma estadia relaxante. Recomendo!',
-                  date: '12 de agosto, 2024'
-                }
-              ].map((review, index) => (
-                <div key={index} className="border-b border-gray-100 last:border-0 pb-6 last:pb-0">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                        <span className="text-sm">{review.name.charAt(0)}</span>
-                      </div>
-                      <div>
-                        <p className="text-sm">{review.name}</p>
-                        <div className="flex items-center gap-1">
-                          {Array.from({ length: review.rating }).map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-500">{review.date}</span>
-                  </div>
-                  <p className="text-gray-600">{review.comment}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
+
+    
   );
 }
