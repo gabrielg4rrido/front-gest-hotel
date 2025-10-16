@@ -110,7 +110,54 @@ export function Header({
               </Button>
             </div>
 
-            {/* Menu (Sheet) agora visível em todas as larguras */}
+            {/* User Avatar and Hamburger Menu */}
+            {user && (
+              <div className="hidden md:flex items-center space-x-2">
+                {/* User Avatar */}
+                <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                </div>
+
+                {/* User Menu Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild></DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end">
+                    <div className="flex items-center justify-start gap-2 p-2">
+                      <div className="flex flex-col space-y-1 leading-none">
+                        <p className="font-medium">{user.name}</p>
+                        <p className="w-[200px] truncate text-sm text-muted-foreground">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                    {userMenuItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <DropdownMenuItem
+                          key={item.id}
+                          onClick={() => onNavigate(item.id)}
+                          className="cursor-pointer"
+                        >
+                          <Icon className="mr-2 h-4 w-4" />
+                          <span>{item.label}</span>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="cursor-pointer text-red-600"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Sair</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+
+            {/* Mobile Menu */}
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="sm">
