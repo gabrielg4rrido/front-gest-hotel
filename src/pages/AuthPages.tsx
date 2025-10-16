@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Separator } from '../components/ui/separator';
+import { Camera, User } from 'lucide-react';
 
 interface AuthPagesProps {
   currentPage: 'login' | 'register';
@@ -18,11 +19,34 @@ export function AuthPages({ currentPage, onNavigate, onLogin }: AuthPagesProps) 
     confirmPassword: '',
     firstName: '',
     lastName: '',
-    phone: ''
+    phone: '',
+    cpf: '',
+    endereco: '',
+    dataNascimento: '',
+    statusCliente: 'ativo',
+    fotoPerfil: null as File | null
   });
+
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData(prev => ({ ...prev, fotoPerfil: file }));
+    
+    // Criar preview da imagem
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewUrl(null);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -131,6 +155,40 @@ export function AuthPages({ currentPage, onNavigate, onLogin }: AuthPagesProps) 
         
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Foto de Perfil - Círculo no topo */}
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <input
+                  id="fotoPerfil"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="fotoPerfil"
+                  className="relative block w-32 h-32 rounded-full overflow-hidden cursor-pointer group border-4 border-gray-200 hover:border-primary transition-colors"
+                >
+                  {previewUrl ? (
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                      <User className="w-16 h-16 text-gray-400" />
+                    </div>
+                  )}
+                  
+                  {/* Overlay com ícone de câmera no hover */}
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Camera className="w-10 h-10 text-white" />
+                  </div>
+                </label>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName">Nome</Label>
@@ -162,6 +220,39 @@ export function AuthPages({ currentPage, onNavigate, onLogin }: AuthPagesProps) 
                 placeholder="(11) 99999-9999"
                 value={formData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="cpf">CPF</Label>
+              <Input
+                id="cpf"
+                placeholder="000.000.000-00"
+                value={formData.cpf}
+                onChange={(e) => handleInputChange('cpf', e.target.value)}
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="endereco">Endereço</Label>
+              <Input
+                id="endereco"
+                placeholder="Rua Exemplo, 123"
+                value={formData.endereco}
+                onChange={(e) => handleInputChange('endereco', e.target.value)}
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="dataNascimento">Data de Nascimento</Label>
+              <Input
+                id="dataNascimento"
+                type="date"
+                value={formData.dataNascimento}
+                onChange={(e) => handleInputChange('dataNascimento', e.target.value)}
                 required
               />
             </div>
