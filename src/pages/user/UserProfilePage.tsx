@@ -217,7 +217,11 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
     if (!userData) return;
 
     // Validações
-    if (!passwordData.senhaAtual || !passwordData.novaSenha || !passwordData.confirmarSenha) {
+    if (
+      !passwordData.senhaAtual ||
+      !passwordData.novaSenha ||
+      !passwordData.confirmarSenha
+    ) {
       setPasswordError("Todos os campos são obrigatórios");
       return;
     }
@@ -242,7 +246,7 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
       });
 
       setPasswordSuccess(true);
-      
+
       // Fechar o modal após 2 segundos
       setTimeout(() => {
         handleClosePasswordModal();
@@ -562,7 +566,9 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
               <p className="text-red-600 text-sm">{passwordError}</p>
             )}
             {passwordSuccess && (
-              <p className="text-green-600 text-sm">Senha alterada com sucesso!</p>
+              <p className="text-green-600 text-sm">
+                Senha alterada com sucesso!
+              </p>
             )}
             <div>
               <Label htmlFor="currentPassword">Senha Atual</Label>
@@ -641,7 +647,8 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
           <DialogHeader>
             <DialogTitle>Excluir Conta</DialogTitle>
             <DialogDescription>
-              Esta ação é irreversível. Todos os seus dados serão permanentemente excluídos.
+              Esta ação é irreversível. Todos os seus dados serão
+              permanentemente excluídos.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -655,7 +662,8 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
                 ⚠️ Atenção
               </p>
               <p className="text-amber-700 text-sm">
-                Ao confirmar, sua conta será excluída permanentemente e você não poderá recuperá-la.
+                Ao confirmar, sua conta será excluída permanentemente e você não
+                poderá recuperá-la.
               </p>
             </div>
             <p className="text-gray-600 text-sm">
