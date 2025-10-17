@@ -122,7 +122,6 @@ export function AuthPages({
 
     try {
       if (currentPage === "login") {
-        // Fazer login
         const loginData: LoginData = {
           email: formData.email,
           senha: formData.password,
@@ -147,7 +146,7 @@ export function AuthPages({
           nome: formData.nome,
           email: formData.email,
           senha: formData.password,
-          cpf: formData.cpf.replace(/\D/g, ""), // Remove formatação
+          cpf: formData.cpf.replace(/\D/g, ""),
           endereco: formData.endereco,
           dataNascimento: formData.dataNascimento,
         };

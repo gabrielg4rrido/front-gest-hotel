@@ -1,4 +1,3 @@
-// Page components exports
 export { HomePage } from "./HomePage";
 export { RoomsPage } from "./RoomsPage";
 export { RoomDetailsPage } from "./RoomDetailsPage";

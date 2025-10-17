@@ -1,6 +1,5 @@
 const API_BASE_URL = "http://localhost:3001";
 
-// Sistema de eventos de autenticação
 type AuthListener = () => void;
 
 class AuthEventEmitter {
