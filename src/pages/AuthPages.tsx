@@ -28,9 +28,7 @@ export function AuthPages({
     email: "",
     password: "",
     confirmPassword: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
+    nome: "",
     cpf: "",
     endereco: "",
     dataNascimento: "",
@@ -73,11 +71,9 @@ export function AuthPages({
     } else {
       // Validações para registro
       if (
-        !formData.firstName ||
-        !formData.lastName ||
+        !formData.nome ||
         !formData.email ||
         !formData.password ||
-        !formData.phone ||
         !formData.cpf ||
         !formData.endereco ||
         !formData.dataNascimento
@@ -148,13 +144,12 @@ export function AuthPages({
       } else {
         // Registrar novo cliente
         const registerData: RegisterData = {
-          nome: `${formData.firstName} ${formData.lastName}`,
+          nome: formData.nome,
           email: formData.email,
           senha: formData.password,
           cpf: formData.cpf.replace(/\D/g, ""), // Remove formatação
           endereco: formData.endereco,
           dataNascimento: formData.dataNascimento,
-          telefone: formData.phone,
         };
 
         await apiService.registerCliente(registerData);
@@ -325,43 +320,13 @@ export function AuthPages({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="firstName">Nome *</Label>
-                <Input
-                  id="firstName"
-                  placeholder="João"
-                  value={formData.firstName}
-                  onChange={(e) =>
-                    handleInputChange("firstName", e.target.value)
-                  }
-                  disabled={isLoading}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="lastName">Sobrenome *</Label>
-                <Input
-                  id="lastName"
-                  placeholder="Silva"
-                  value={formData.lastName}
-                  onChange={(e) =>
-                    handleInputChange("lastName", e.target.value)
-                  }
-                  disabled={isLoading}
-                  required
-                />
-              </div>
-            </div>
-
             <div>
-              <Label htmlFor="phone">Telefone *</Label>
+              <Label htmlFor="nome">Nome *</Label>
               <Input
-                id="phone"
-                type="tel"
-                placeholder="(11) 99999-9999"
-                value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
+                id="nome"
+                placeholder="João Silva"
+                value={formData.nome}
+                onChange={(e) => handleInputChange("nome", e.target.value)}
                 disabled={isLoading}
                 required
               />

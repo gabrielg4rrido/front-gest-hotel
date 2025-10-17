@@ -10,7 +10,6 @@ import {
   PaymentPage,
   UserProfilePage,
   MyReservationsPage,
-  PersonalInfoPage,
   MyTravelsPage,
 } from "./pages";
 import { apiService, TokenManager } from "./services/api";
@@ -162,9 +161,8 @@ export default function App() {
           <ServicesPage onNavigate={handleNavigate} />
         );
       case "profile":
-        return <UserProfilePage onNavigate={handleNavigate} />;
       case "personal-info":
-        return <PersonalInfoPage onNavigate={handleNavigate} />;
+        return <UserProfilePage onNavigate={handleNavigate} />;
       case "my-reservations":
         return <MyReservationsPage onNavigate={handleNavigate} />;
       case "my-travels":

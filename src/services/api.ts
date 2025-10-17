@@ -41,7 +41,6 @@ export interface RegisterData {
   cpf: string;
   endereco: string;
   dataNascimento: string;
-  telefone?: string;
 }
 
 export interface LoginData {
@@ -56,7 +55,6 @@ export interface Cliente {
   cpf: string;
   endereco: string;
   dataNascimento: string;
-  telefone?: string;
   statusCliente: string;
   fotoPerfil?: string;
   createdAt: string;
@@ -177,7 +175,6 @@ export const apiService = {
         cpf: data.cpf,
         endereco: data.endereco,
         dataNascimento: data.dataNascimento,
-        telefone: data.telefone,
       }),
     });
 
@@ -239,6 +236,26 @@ export const apiService = {
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || "Erro ao obter dados do cliente");
+    }
+
+    return response.json();
+  },
+
+  // Atualizar dados do cliente
+  async updateCliente(
+    id: string,
+    data: Partial<RegisterData>
+  ): Promise<Cliente> {
+    const response = await apiRequest(`/clientes/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || "Erro ao atualizar dados do cliente"
+      );
     }
 
     return response.json();

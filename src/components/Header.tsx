@@ -68,7 +68,6 @@ export function Header({
 
   const userMenuItems = [
     { id: "profile", label: "Meu Perfil", icon: User },
-    { id: "personal-info", label: "Informações Pessoais", icon: User },
     { id: "my-travels", label: "Minhas Viagens", icon: Calendar },
   ];
 
@@ -155,11 +154,6 @@ export function Header({
             {/* User Avatar - show when authenticated */}
             {isAuthenticated && displayUser && (
               <div className="hidden md:flex items-center space-x-2">
-                {/* User Avatar */}
-                <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
-                  <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-                </div>
-
                 {/* User Menu Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -175,6 +169,7 @@ export function Header({
                         <AvatarFallback>
                           {displayUser.name
                             .split(" ")
+                            .slice(0, 2)
                             .map((n) => n[0])
                             .join("")}
                         </AvatarFallback>
@@ -217,7 +212,6 @@ export function Header({
               </div>
             )}
 
-            {/* Mobile Menu - show only when authenticated */}
             {isAuthenticated && (
               <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetTrigger asChild>
@@ -243,6 +237,7 @@ export function Header({
                             <AvatarFallback>
                               {displayUser.name
                                 .split(" ")
+                                .slice(0, 2)
                                 .map((n) => n[0])
                                 .join("")}
                             </AvatarFallback>
