@@ -40,6 +40,7 @@ export interface RegisterData {
   cpf: string;
   endereco: string;
   dataNascimento: string;
+  fotoPerfil?: File;
 }
 
 export interface LoginData {
@@ -162,6 +163,32 @@ async function apiRequest(
 export const apiService = {
   // Registrar novo cliente
   async registerCliente(data: RegisterData): Promise<Cliente> {
+    // Se houver foto de perfil, usar FormData
+    if (data.fotoPerfil) {
+      const formData = new FormData();
+      formData.append("nome", data.nome);
+      formData.append("email", data.email);
+      formData.append("senha", data.senha);
+      formData.append("cpf", data.cpf);
+      formData.append("endereco", data.endereco);
+      formData.append("dataNascimento", data.dataNascimento);
+      formData.append("fotoPerfil", data.fotoPerfil);
+
+      const response = await fetch(`${API_BASE_URL}/clientes`, {
+        method: "POST",
+        body: formData,
+        // Não definir Content-Type - o browser define automaticamente com boundary
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao registrar cliente");
+      }
+
+      return response.json();
+    }
+
+    // Se não houver foto, usar JSON normal
     const response = await fetch(`${API_BASE_URL}/clientes`, {
       method: "POST",
       headers: {

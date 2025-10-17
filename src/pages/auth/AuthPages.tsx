@@ -149,6 +149,7 @@ export function AuthPages({
           cpf: formData.cpf.replace(/\D/g, ""),
           endereco: formData.endereco,
           dataNascimento: formData.dataNascimento,
+          ...(formData.fotoPerfil && { fotoPerfil: formData.fotoPerfil }),
         };
 
         await apiService.registerCliente(registerData);
