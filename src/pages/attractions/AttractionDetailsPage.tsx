@@ -5,11 +5,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { Breadcrumb } from "../components/Breadcrumb";
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
+import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { Breadcrumb } from "../../components/Breadcrumb";
 import { Star, Clock, MapPin, Car, Phone } from "lucide-react";
 
 interface AttractionDetailsPageProps {

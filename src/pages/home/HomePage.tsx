@@ -1,14 +1,14 @@
 import React from "react";
-import { Button } from "../components/ui/button";
+import { Button } from "../../components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { SearchForm } from "../components/SearchForm";
+} from "../../components/ui/card";
+import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { SearchForm } from "../../components/SearchForm";
 
 interface HomePageProps {
   onNavigate: (page: string, roomId?: number) => void;

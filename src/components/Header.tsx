@@ -221,7 +221,7 @@ export function Header({
                 </SheetTrigger>
                 <SheetContent side="right" className="w-80">
                   <SheetHeader>
-                    <SheetTitle>Menu</SheetTitle>
+                    <SheetTitle>Painel do Usuário</SheetTitle>
                   </SheetHeader>
 
                   <div className="mt-6 space-y-4">
@@ -271,26 +271,6 @@ export function Header({
                         <div className="border-t pt-4"></div>
                       </>
                     )}
-
-                    {/* Navigation Items */}
-                    <div className="space-y-2">
-                      {menuItems.map((item) => {
-                        const Icon = item.icon;
-                        return (
-                          <Button
-                            key={item.id}
-                            variant={
-                              currentPage === item.id ? "secondary" : "ghost"
-                            }
-                            className="w-full justify-start"
-                            onClick={() => handleNavigate(item.id)}
-                          >
-                            <Icon className="mr-2 h-4 w-4" />
-                            {item.label}
-                          </Button>
-                        );
-                      })}
-                    </div>
 
                     {/* Logout Button */}
                     <Button

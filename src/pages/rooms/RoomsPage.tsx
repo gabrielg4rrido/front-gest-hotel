@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "../components/ui/button";
+import { Button } from "../../components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { SearchForm } from "../components/SearchForm";
-import { Breadcrumb } from "../components/Breadcrumb";
+} from "../../components/ui/card";
+import { Badge } from "../../components/ui/badge";
+import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { SearchForm } from "../../components/SearchForm";
+import { Breadcrumb } from "../../components/Breadcrumb";
 import { Star } from "lucide-react";
 
 interface RoomsPageProps {
