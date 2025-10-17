@@ -340,6 +340,24 @@ export const apiService = {
   getCurrentUser(): any {
     return TokenManager.getUserData();
   },
+
+  // Alterar senha
+  async changePassword(
+    clienteId: string,
+    data: { senhaAtual: string; novaSenha: string }
+  ): Promise<{ message: string }> {
+    const response = await apiRequest(`/clientes/${clienteId}/senha`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Erro ao alterar senha");
+    }
+
+    return response.json();
+  },
 };
 
 export { TokenManager };
