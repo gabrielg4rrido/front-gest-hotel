@@ -358,6 +358,20 @@ export const apiService = {
 
     return response.json();
   },
+
+  // Excluir conta
+  async deleteCliente(clienteId: string): Promise<{ message: string }> {
+    const response = await apiRequest(`/clientes/${clienteId}/desativar`, {
+      method: "PUT",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Erro ao excluir conta");
+    }
+
+    return response.json();
+  },
 };
 
 export { TokenManager };

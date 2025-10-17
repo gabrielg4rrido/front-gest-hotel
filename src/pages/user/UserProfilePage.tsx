@@ -54,6 +54,11 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
     confirmarSenha: "",
   });
 
+  // Estado para o modal de excluir conta
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   // Carregar dados do usuário ao montar o componente
   useEffect(() => {
     const loadUserData = async () => {
@@ -247,6 +252,39 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
       setPasswordError(err.message || "Erro ao alterar senha");
     } finally {
       setIsChangingPassword(false);
+    }
+  };
+
+  // Função para abrir o modal de excluir conta
+  const handleOpenDeleteModal = () => {
+    setDeleteError(null);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Função para fechar o modal de excluir conta
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setDeleteError(null);
+  };
+
+  // Função para excluir a conta
+  const handleDeleteAccount = async () => {
+    if (!userData) return;
+
+    try {
+      setIsDeletingAccount(true);
+      setDeleteError(null);
+
+      await apiService.deleteCliente(userData.id);
+
+      // Fazer logout e redirecionar para home
+      await apiService.logout();
+      onNavigate("home");
+    } catch (err: any) {
+      console.error("Erro ao excluir conta:", err);
+      setDeleteError(err.message || "Erro ao excluir conta");
+    } finally {
+      setIsDeletingAccount(false);
     }
   };
 
@@ -491,12 +529,15 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
                       className="w-full justify-start"
                       onClick={handleOpenPasswordModal}
                     >
+                      <Lock className="h-4 w-4 mr-2" />
                       Alterar senha
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-red-600 hover:text-red-700"
+                      className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={handleOpenDeleteModal}
                     >
+                      <X className="h-4 w-4 mr-2" />
                       Excluir conta
                     </Button>
                   </div>
@@ -588,6 +629,59 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
                 </>
               ) : (
                 "Alterar Senha"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Confirmação de Exclusão de Conta */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir Conta</DialogTitle>
+            <DialogDescription>
+              Esta ação é irreversível. Todos os seus dados serão permanentemente excluídos.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {deleteError && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-red-600 text-sm">{deleteError}</p>
+              </div>
+            )}
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
+              <p className="text-amber-800 text-sm font-medium mb-2">
+                ⚠️ Atenção
+              </p>
+              <p className="text-amber-700 text-sm">
+                Ao confirmar, sua conta será excluída permanentemente e você não poderá recuperá-la.
+              </p>
+            </div>
+            <p className="text-gray-600 text-sm">
+              Tem certeza de que deseja excluir sua conta?
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={handleCloseDeleteModal}
+              disabled={isDeletingAccount}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={isDeletingAccount}
+            >
+              {isDeletingAccount ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                "Excluir Conta"
               )}
             </Button>
           </DialogFooter>
