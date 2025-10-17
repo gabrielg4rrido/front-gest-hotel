@@ -47,7 +47,6 @@ interface Travel {
   status: "confirmed" | "pending" | "cancelled" | "completed";
   image: string;
   additionalServices?: string[];
-  rating?: number;
   review?: string;
   photos?: string[];
 }
@@ -192,23 +191,6 @@ export function MyTravelsPage({ onNavigate }: MyTravelsPageProps) {
                 <MapPin className="h-3 w-3" />
                 <span>{travel.location}</span>
               </div>
-              {travel.status === "completed" && travel.rating && (
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-4 h-4 ${
-                        i < travel.rating!
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-                  <span className="text-sm text-gray-600 ml-1">
-                    ({travel.rating}/5)
-                  </span>
-                </div>
-              )}
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-600">Código</p>
@@ -252,38 +234,6 @@ export function MyTravelsPage({ onNavigate }: MyTravelsPageProps) {
                       {service}
                     </Badge>
                   ))}
-                </div>
-              </div>
-            )}
-
-          {travel.status === "completed" && travel.review && (
-            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-700 italic">"{travel.review}"</p>
-            </div>
-          )}
-
-          {travel.status === "completed" &&
-            travel.photos &&
-            travel.photos.length > 0 && (
-              <div className="mb-4">
-                <p className="text-sm mb-2">Fotos da viagem:</p>
-                <div className="flex gap-2 overflow-x-auto">
-                  {travel.photos.slice(0, 4).map((photo, index) => (
-                    <div key={index} className="flex-shrink-0">
-                      <ImageWithFallback
-                        src={photo}
-                        alt={`Foto ${index + 1}`}
-                        className="w-16 h-16 object-cover rounded-lg"
-                      />
-                    </div>
-                  ))}
-                  {travel.photos.length > 4 && (
-                    <div className="flex-shrink-0 w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                      <span className="text-xs text-gray-600">
-                        +{travel.photos.length - 4}
-                      </span>
-                    </div>
-                  )}
                 </div>
               </div>
             )}
@@ -342,7 +292,7 @@ export function MyTravelsPage({ onNavigate }: MyTravelsPageProps) {
         </div>
 
         {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card>
             <CardContent className="p-4 text-center">
               <div className="text-2xl text-green-600">
@@ -367,19 +317,6 @@ export function MyTravelsPage({ onNavigate }: MyTravelsPageProps) {
                 )}
               </div>
               <p className="text-sm text-gray-600">Dias de Viagem</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl text-orange-600">
-                {pastTravels.length > 0
-                  ? (
-                      pastTravels.reduce((acc, t) => acc + (t.rating || 0), 0) /
-                      pastTravels.filter((t) => t.rating).length
-                    ).toFixed(1)
-                  : "0"}
-              </div>
-              <p className="text-sm text-gray-600">Avaliação Média</p>
             </CardContent>
           </Card>
         </div>
@@ -431,8 +368,7 @@ export function MyTravelsPage({ onNavigate }: MyTravelsPageProps) {
                   </div>
                   <h3 className="text-lg mb-2">Nenhuma viagem no histórico</h3>
                   <p className="text-gray-600">
-                    Suas viagens passadas aparecerão aqui com fotos e
-                    avaliações.
+                    Suas viagens passadas aparecerão aqui.
                   </p>
                 </CardContent>
               </Card>

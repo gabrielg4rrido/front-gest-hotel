@@ -121,11 +121,6 @@ export function AttractionDetailsPage({
                 {attraction.category}
               </Badge>
             </div>
-            <div className="absolute top-6 right-6">
-              <Badge className="bg-white text-gray-800">
-                ⭐ {attraction.rating}
-              </Badge>
-            </div>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">

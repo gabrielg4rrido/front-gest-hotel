@@ -160,11 +160,6 @@ export function AttractionsPage({ onNavigate }: AttractionsPageProps) {
                       {attraction.category}
                     </Badge>
                   </div>
-                  <div className="absolute top-4 right-4">
-                    <Badge className="bg-white text-gray-800">
-                      ⭐ {attraction.rating}
-                    </Badge>
-                  </div>
                 </div>
 
                 <CardHeader>
