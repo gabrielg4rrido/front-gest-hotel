@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { CreditCard, Banknote } from "lucide-react";
+import { CreditCard, Banknote, Loader2 } from "lucide-react";
 
 interface CardData {
   number: string;
@@ -113,7 +113,7 @@ export function PaymentForm({
       setLoadingMethods(true);
       setMethodsError(null);
       try {
-        const res = await fetch("http://localhost:3001/api/metodo-pagamento");
+        const res = await fetch("http://localhost:3002/api/metodo-pagamento");
         if (!res.ok) throw new Error("Falha ao buscar métodos");
 
         const json: ApiPaymentMethodsResponse = await res.json();
@@ -175,7 +175,10 @@ export function PaymentForm({
         <div>
           <Label className="text-base mb-3 block">Forma de Pagamento</Label>
           {loadingMethods && (
-            <div className="text-sm text-gray-500">Carregando métodos...</div>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Carregando métodos...
+            </div>
           )}
           {methodsError && (
             <div className="text-sm text-red-600">{methodsError}</div>

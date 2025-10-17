@@ -294,15 +294,6 @@ export function ServiceDetailsPage({
                 </div>
                 <div>
                   <h1>{service.title}</h1>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm">{service.rating}</span>
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      ({service.reviews} avaliações)
-                    </span>
-                  </div>
                 </div>
               </div>
 
@@ -372,71 +363,6 @@ export function ServiceDetailsPage({
               <div key={index} className="flex items-center gap-3">
                 <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
                 <span>{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Reviews Section */}
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h3>Avaliações dos Clientes</h3>
-            <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-              <span>{service.rating} de 5</span>
-              <span className="text-gray-500">
-                ({service.reviews} avaliações)
-              </span>
-            </div>
-          </div>
-
-          {/* Sample Reviews */}
-          <div className="space-y-6">
-            {[
-              {
-                name: "Maria Silva",
-                rating: 5,
-                comment:
-                  "Serviço excepcional! A equipe é muito atenciosa e profissional.",
-                date: "15 de agosto, 2024",
-              },
-              {
-                name: "João Santos",
-                rating: 5,
-                comment: "Experiência incrível! Superou todas as expectativas.",
-                date: "10 de agosto, 2024",
-              },
-              {
-                name: "Ana Costa",
-                rating: 4,
-                comment: "Muito bom, recomendo! Ambiente excelente.",
-                date: "5 de agosto, 2024",
-              },
-            ].map((review, index) => (
-              <div
-                key={index}
-                className="border-b border-gray-100 last:border-0 pb-6 last:pb-0"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <span className="text-sm">{review.name.charAt(0)}</span>
-                    </div>
-                    <div>
-                      <p className="text-sm">{review.name}</p>
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: review.rating }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <span className="text-sm text-gray-500">{review.date}</span>
-                </div>
-                <p className="text-gray-600">{review.comment}</p>
               </div>
             ))}
           </div>
