@@ -22,7 +22,7 @@ interface ServicesPageProps {
 export function ServicesPage({ onNavigate }: ServicesPageProps) {
   const [services, setServices] = useState<Service[]>([]);
 
-  // Ícones relacionados ao título de cada serviço
+  
   const serviceIcons: Record<string, string> = {
     "Restaurante Gourmet": "🍽️",
     "Spa & Wellness": "💆",
@@ -34,7 +34,7 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
     "Lavanderia Express": "👔",
   };
 
-  // Busca os serviços no backend
+  
   useEffect(() => {
     fetch("http://localhost:3001/api/services")
       .then((res) => res.json())
@@ -50,10 +50,10 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
+        {}
         <Breadcrumb items={breadcrumbItems} />
 
-        {/* Header */}
+        {}
         <div className="text-center mb-12">
           <h1 className="text-4xl mb-4">Nossos Serviços</h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -62,7 +62,7 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
           </p>
         </div>
 
-        {/* GRID DE SERVIÇOS */}
+        {}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service) => (
             <Card
@@ -75,7 +75,7 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
                   alt={service.titulo}
                   className="w-full h-full object-cover"
                 />
-                {/* Ícone sobreposto */}
+                {}
                 <div className="absolute top-4 left-4">
                   <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center text-2xl shadow-sm">
                     {serviceIcons[service.titulo] || "⭐"}
@@ -106,7 +106,7 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
           ))}
         </div>
 
-        {/* SERVIÇOS ADICIONAIS */}
+        {}
         <div className="mt-16 bg-white rounded-lg p-8 shadow-sm">
           <h3 className="text-2xl mb-6 text-center">Serviços Adicionais</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -131,7 +131,7 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
           </div>
         </div>
 
-        {/* SEÇÃO DE CONTATO */}
+        {}
         <div className="text-center mt-16 p-8 bg-primary text-white rounded-lg">
           <h3 className="text-2xl mb-4">Precisa de algo especial?</h3>
           <p className="mb-6 opacity-90">

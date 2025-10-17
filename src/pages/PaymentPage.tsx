@@ -13,7 +13,7 @@ interface PaymentPageProps {
       checkOut: string;
     };
     guests?: number;
-    duration?: number; // for services in hours
+    duration?: number; 
   };
 }
 
@@ -27,7 +27,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     cvv: ''
   });
 
-  // Estado para dados do hóspede (mock)
+
   const [guestData, setGuestData] = useState({
     totalGuests: bookingData?.guests || 2,
     firstName: '',
@@ -37,11 +37,11 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     isMainGuest: 'main'
   });
 
-  // Estado para serviços adicionais (única parte dinâmica)
+
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [additionalServices, setAdditionalServices] = useState<any[]>([]);
 
-  // 🔹 SOMENTE ESSA PARTE SE CONECTA AO BANCO
+
   useEffect(() => {
     fetch("http://localhost:3001/api/additional-services")
       .then((res) => res.json())
@@ -51,7 +51,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
           id: String(item.id),
           name: item.titulo,
           description: item.descricao,
-          price: Number(item.preco) || 0, // 🔥 garante número
+          price: Number(item.preco) || 0,
           icon:
             item.titulo === "Restaurante Gourmet" ? "🍽️" :
               item.titulo === "Spa & Wellness" ? "💆" :
@@ -76,7 +76,6 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     );
   };
 
-  // Mock de dados da reserva
   const getBookingData = () => {
     if (bookingData) return bookingData;
     const sessionData = sessionStorage.getItem('paymentData');
@@ -135,7 +134,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-6xl">
-        {/* Cabeçalho */}
+        {}
         <div className="mb-8">
           <Button
             variant="ghost"
@@ -151,7 +150,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Resumo da Reserva */}
+          {}
           <div className="lg:col-span-1">
             <BookingSummary
               booking={booking}
@@ -165,20 +164,20 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            {/* Dados do Hóspede (mock) */}
+            {}
             <GuestDataForm
               guestData={guestData}
               onGuestDataChange={setGuestData}
             />
 
-            {/* 🔹 Serviços Adicionais (dados reais do banco) */}
+            {}
             <AdditionalServices
               additionalServices={additionalServices}
               selectedServices={selectedServices}
               onServiceToggle={handleServiceToggle}
             />
 
-            {/* Dados do Pagamento (mock) */}
+            {}
             <PaymentForm
               paymentMethod={paymentMethod}
               installments={installments}
