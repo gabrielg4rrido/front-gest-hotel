@@ -1,17 +1,22 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import { User } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { User } from "lucide-react";
 
 interface GuestData {
   totalGuests: number;
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
   isMainGuest: string;
 }
 
@@ -20,7 +25,10 @@ interface GuestDataFormProps {
   onGuestDataChange: (data: GuestData) => void;
 }
 
-export function GuestDataForm({ guestData, onGuestDataChange }: GuestDataFormProps) {
+export function GuestDataForm({
+  guestData,
+  onGuestDataChange,
+}: GuestDataFormProps) {
   const updateGuestData = (updates: Partial<GuestData>) => {
     onGuestDataChange({ ...guestData, ...updates });
   };
@@ -37,9 +45,11 @@ export function GuestDataForm({ guestData, onGuestDataChange }: GuestDataFormPro
         {/* Quantidade de Hóspedes */}
         <div>
           <Label htmlFor="totalGuests">Quantidade de Hóspedes</Label>
-          <Select 
-            value={guestData.totalGuests.toString()} 
-            onValueChange={(value) => updateGuestData({ totalGuests: parseInt(value) })}
+          <Select
+            value={guestData.totalGuests.toString()}
+            onValueChange={(value) =>
+              updateGuestData({ totalGuests: parseInt(value) })
+            }
           >
             <SelectTrigger>
               <SelectValue />
@@ -47,7 +57,7 @@ export function GuestDataForm({ guestData, onGuestDataChange }: GuestDataFormPro
             <SelectContent>
               {[1, 2, 3, 4, 5, 6].map((num) => (
                 <SelectItem key={num} value={num.toString()}>
-                  {num} {num === 1 ? 'hóspede' : 'hóspedes'}
+                  {num} {num === 1 ? "hóspede" : "hóspedes"}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -56,9 +66,11 @@ export function GuestDataForm({ guestData, onGuestDataChange }: GuestDataFormPro
 
         {/* Tipo de Reserva */}
         <div>
-          <Label className="text-base mb-3 block">Você é o hóspede principal?</Label>
-          <RadioGroup 
-            value={guestData.isMainGuest} 
+          <Label className="text-base mb-3 block">
+            Você é o hóspede principal?
+          </Label>
+          <RadioGroup
+            value={guestData.isMainGuest}
             onValueChange={(value) => updateGuestData({ isMainGuest: value })}
           >
             <div className="flex items-center space-x-2">
@@ -79,12 +91,11 @@ export function GuestDataForm({ guestData, onGuestDataChange }: GuestDataFormPro
         {/* Dados Pessoais */}
         <div className="space-y-4">
           <h4 className="font-semibold">
-            {guestData.isMainGuest === 'main' 
-              ? 'Seus dados pessoais' 
-              : 'Dados do hóspede titular'
-            }
+            {guestData.isMainGuest === "main"
+              ? "Seus dados pessoais"
+              : "Dados do hóspede titular"}
           </h4>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="firstName">Nome</Label>
@@ -114,16 +125,6 @@ export function GuestDataForm({ guestData, onGuestDataChange }: GuestDataFormPro
               placeholder="exemplo@email.com"
               value={guestData.email}
               onChange={(e) => updateGuestData({ email: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="phone">Telefone</Label>
-            <Input
-              id="phone"
-              placeholder="(11) 99999-9999"
-              value={guestData.phone}
-              onChange={(e) => updateGuestData({ phone: e.target.value })}
             />
           </div>
         </div>

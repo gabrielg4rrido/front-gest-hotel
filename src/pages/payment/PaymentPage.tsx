@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
-import { Button } from '../components/ui/button';
-import { BookingSummary, GuestDataForm, AdditionalServices, PaymentForm } from '../components/payment';
+import React, { useState } from "react";
+import { Button } from "../../components/ui/button";
+import {
+  BookingSummary,
+  GuestDataForm,
+  AdditionalServices,
+  PaymentForm,
+} from "../../components/payment";
 
 interface PaymentPageProps {
   onNavigate: (page: string) => void;
   bookingData?: {
-    type: 'room' | 'service';
+    type: "room" | "service";
     name: string;
     price: number;
     dates?: {
@@ -13,115 +18,115 @@ interface PaymentPageProps {
       checkOut: string;
     };
     guests?: number;
-    duration?: number; // for services in hours
+    duration?: number;
   };
 }
 
 export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
-  const [paymentMethod, setPaymentMethod] = useState('credit');
-  const [installments, setInstallments] = useState('1');
+  const [paymentMethod, setPaymentMethod] = useState("credit");
+  const [installments, setInstallments] = useState("1");
   const [cardData, setCardData] = useState({
-    number: '',
-    name: '',
-    expiry: '',
-    cvv: ''
+    number: "",
+    name: "",
+    expiry: "",
+    cvv: "",
   });
-  
+
   // Estados para dados do hóspede
   const [guestData, setGuestData] = useState({
     totalGuests: bookingData?.guests || 2,
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    isMainGuest: 'main' // 'main' ou 'other'
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    isMainGuest: "main",
   });
 
   // Estados para serviços adicionais
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  
+
   const additionalServices = [
     {
-      id: 'restaurant',
-      name: 'Restaurante Gourmet',
-      description: 'Acesso ao restaurante com desconto de 15%',
+      id: "restaurant",
+      name: "Restaurante Gourmet",
+      description: "Acesso ao restaurante com desconto de 15%",
       price: 0,
-      icon: '🍽️'
+      icon: "🍽️",
     },
     {
-      id: 'spa',
-      name: 'Spa & Wellness',
-      description: 'Pacote completo com massagem relaxante',
+      id: "spa",
+      name: "Spa & Wellness",
+      description: "Pacote completo com massagem relaxante",
       price: 250,
-      icon: '💆'
+      icon: "💆",
     },
     {
-      id: 'gym',
-      name: 'Academia Premium',
-      description: 'Acesso ilimitado + personal trainer',
+      id: "gym",
+      name: "Academia Premium",
+      description: "Acesso ilimitado + personal trainer",
       price: 100,
-      icon: '💪'
+      icon: "💪",
     },
     {
-      id: 'concierge',
-      name: 'Concierge 24h',
-      description: 'Atendimento personalizado durante a estadia',
+      id: "concierge",
+      name: "Concierge 24h",
+      description: "Atendimento personalizado durante a estadia",
       price: 150,
-      icon: '🎩'
+      icon: "🎩",
     },
     {
-      id: 'transfer',
-      name: 'Transfer Aeroporto',
-      description: 'Transfer ida e volta do aeroporto',
+      id: "transfer",
+      name: "Transfer Aeroporto",
+      description: "Transfer ida e volta do aeroporto",
       price: 120,
-      icon: '✈️'
+      icon: "✈️",
     },
     {
-      id: 'laundry',
-      name: 'Lavanderia Express',
-      description: 'Serviço de lavanderia premium',
+      id: "laundry",
+      name: "Lavanderia Express",
+      description: "Serviço de lavanderia premium",
       price: 80,
-      icon: '👔'
-    }
+      icon: "👔",
+    },
   ];
 
   const handleServiceToggle = (serviceId: string) => {
-    setSelectedServices(prev => 
-      prev.includes(serviceId) 
-        ? prev.filter(id => id !== serviceId)
+    setSelectedServices((prev) =>
+      prev.includes(serviceId)
+        ? prev.filter((id) => id !== serviceId)
         : [...prev, serviceId]
     );
   };
 
-  // Get booking data from props or sessionStorage
   const getBookingData = () => {
     if (bookingData) return bookingData;
-    
-    const sessionData = sessionStorage.getItem('paymentData');
+
+    const sessionData = sessionStorage.getItem("paymentData");
     if (sessionData) {
       return JSON.parse(sessionData);
     }
-    
-    // Default booking data if none provided
+
     return {
-      type: 'room' as const,
-      name: 'Quarto Deluxe',
+      type: "room" as const,
+      name: "Quarto Deluxe",
       price: 350,
       dates: {
-        checkIn: '2025-09-15',
-        checkOut: '2025-09-18'
+        checkIn: "2025-09-15",
+        checkOut: "2025-09-18",
       },
-      guests: 2
+      guests: 2,
     };
   };
 
   const booking = getBookingData();
-  
+
   const calculateDays = () => {
     if (booking.dates) {
       const checkIn = new Date(booking.dates.checkIn);
       const checkOut = new Date(booking.dates.checkOut);
-      return Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 3600 * 24));
+      return Math.ceil(
+        (checkOut.getTime() - checkIn.getTime()) / (1000 * 3600 * 24)
+      );
     }
     return booking.duration || 1;
   };
@@ -129,7 +134,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
   const days = calculateDays();
   const roomSubtotal = booking.price * days;
   const servicesSubtotal = selectedServices.reduce((acc, serviceId) => {
-    const service = additionalServices.find(s => s.id === serviceId);
+    const service = additionalServices.find((s) => s.id === serviceId);
     return acc + (service?.price || 0);
   }, 0);
   const subtotal = roomSubtotal + servicesSubtotal;
@@ -137,38 +142,47 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
   const total = subtotal + taxes;
 
   const installmentOptions = [
-    { value: '1', label: `1x de R$ ${total.toFixed(2)}` },
-    { value: '2', label: `2x de R$ ${(total / 2).toFixed(2)}` },
-    { value: '3', label: `3x de R$ ${(total / 3).toFixed(2)}` },
-    { value: '6', label: `6x de R$ ${(total / 6).toFixed(2)}` },
-    { value: '12', label: `12x de R$ ${(total / 12).toFixed(2)}` }
+    { value: "1", label: `1x de R$ ${total.toFixed(2)}` },
+    { value: "2", label: `2x de R$ ${(total / 2).toFixed(2)}` },
+    { value: "3", label: `3x de R$ ${(total / 3).toFixed(2)}` },
+    { value: "6", label: `6x de R$ ${(total / 6).toFixed(2)}` },
+    { value: "12", label: `12x de R$ ${(total / 12).toFixed(2)}` },
   ];
 
   const handlePayment = () => {
     // Validar dados do hóspede
-    if (!guestData.firstName || !guestData.lastName || !guestData.email || !guestData.phone) {
-      alert('Por favor, preencha todos os dados do hóspede.');
+    if (
+      !guestData.firstName ||
+      !guestData.lastName ||
+      !guestData.email ||
+      !guestData.phone
+    ) {
+      alert("Por favor, preencha todos os dados do hóspede.");
       return;
     }
 
     // Simular processamento do pagamento
-    alert(`Pagamento processado com sucesso para ${guestData.firstName} ${guestData.lastName}! Você receberá a confirmação por email.`);
-    onNavigate('home');
+    alert(
+      `Pagamento processado com sucesso para ${guestData.firstName} ${guestData.lastName}! Você receberá a confirmação por email.`
+    );
+    onNavigate("home");
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="mb-8">
-          <Button 
-            variant="ghost" 
-            onClick={() => onNavigate('home')}
+          <Button
+            variant="ghost"
+            onClick={() => onNavigate("home")}
             className="mb-4"
           >
             ← Voltar
           </Button>
           <h1 className="text-3xl mb-2">Finalizar Reserva</h1>
-          <p className="text-gray-600">Complete os dados do hóspede e pagamento para confirmar sua reserva</p>
+          <p className="text-gray-600">
+            Complete os dados do hóspede e pagamento para confirmar sua reserva
+          </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -210,7 +224,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
               onInstallmentsChange={setInstallments}
               onCardDataChange={setCardData}
               onPayment={handlePayment}
-              onCancel={() => onNavigate('home')}
+              onCancel={() => onNavigate("home")}
             />
           </div>
         </div>
