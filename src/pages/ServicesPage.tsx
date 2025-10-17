@@ -15,45 +15,98 @@ interface Service {
   imagem: string;
 }
 
+interface AdditionalService {
+  id: number;
+  titulo: string;
+  descricao: string;
+  preco: number;
+  incluso: number;
+  icone: string | null;
+}
+
 interface ServicesPageProps {
   onNavigate: (page: string, serviceId?: number) => void;
 }
 
 export function ServicesPage({ onNavigate }: ServicesPageProps) {
   const [services, setServices] = useState<Service[]>([]);
+  const [additionalServices, setAdditionalServices] = useState<AdditionalService[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  
-  const serviceIcons: Record<string, string> = {
+  // 🔹 Mapeamento fixo de ícones (usado como fallback)
+  const iconMap: Record<string, string> = {
     "Restaurante Gourmet": "🍽️",
     "Spa & Wellness": "💆",
-    "Piscina Infinity": "🏊",
     "Academia Premium": "💪",
-    "Business Center": "💼",
     "Concierge 24h": "🎩",
     "Transfer Aeroporto": "✈️",
     "Lavanderia Express": "👔",
+    "Baby Sitting": "👶",
+    "Pet Friendly": "🐕",
+    "Room Service 24h": "🛎️",
+    "Aluguel de Carros": "🚗",
+    "Tour Guiado": "🗺️",
+    "Wi-Fi Premium": "📶",
   };
 
-  
+  // 🔹 Tradução de códigos de ícone do banco (":baby:", ":dog:", etc.)
+  const emojiMap: Record<string, string> = {
+    ":baby:": "👶",
+    ":dog:": "🐕",
+    ":bell:": "🛎️",
+    ":car:": "🚗",
+    ":map:": "🗺️",
+    ":wifi:": "📶",
+  };
+
   useEffect(() => {
-    fetch("http://localhost:3001/api/services")
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Serviços recebidos:", data);
-        setServices(data);
-      })
-      .catch((err) => console.error("Erro ao buscar serviços:", err));
+    async function fetchData() {
+      try {
+        const [servicesRes, additionalRes] = await Promise.all([
+          fetch("http://localhost:3001/api/services"),
+          fetch("http://localhost:3001/api/additional-services"),
+        ]);
+
+        if (!servicesRes.ok || !additionalRes.ok) {
+          throw new Error("Falha ao buscar dados do backend");
+        }
+
+        const [servicesData, additionalData] = await Promise.all([
+          servicesRes.json(),
+          additionalRes.json(),
+        ]);
+
+        setServices(servicesData);
+        setAdditionalServices(additionalData);
+      } catch (err) {
+        console.error("Erro ao carregar serviços:", err);
+        setError("⚠️ O servidor não está disponível. Inicie o backend para visualizar os serviços.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
   }, []);
 
   const breadcrumbItems = [{ label: "Serviços", href: "#" }];
 
+  if (loading) {
+    return <div className="text-center mt-10 text-gray-500">Carregando serviços...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center mt-10 text-red-500">{error}</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {}
+        {/* Breadcrumb */}
         <Breadcrumb items={breadcrumbItems} />
 
-        {}
+        {/* Cabeçalho */}
         <div className="text-center mb-12">
           <h1 className="text-4xl mb-4">Nossos Serviços</h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -62,84 +115,64 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
           </p>
         </div>
 
-        {}
+        {/* Lista de Serviços */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service) => (
-            <Card
-              key={service.id}
-              className="overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full"
-            >
+            <Card key={service.id} className="overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full">
               <div className="relative h-48 w-full">
                 <ImageWithFallback
                   src={service.imagem}
                   alt={service.titulo}
                   className="w-full h-full object-cover"
                 />
-                {}
-                <div className="absolute top-4 left-4">
-                  <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center text-2xl shadow-sm">
-                    {serviceIcons[service.titulo] || "⭐"}
-                  </div>
-                </div>
               </div>
 
-              <div className="flex flex-col flex-grow">
-                <CardHeader className="flex-shrink-0 pb-3">
-                  <CardTitle className="text-xl">{service.titulo}</CardTitle>
-                  <CardDescription className="text-sm">{service.descricao}</CardDescription>
-                </CardHeader>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-xl">{service.titulo}</CardTitle>
+                <CardDescription className="text-sm">{service.descricao}</CardDescription>
+              </CardHeader>
 
-                <CardContent className="flex flex-col flex-grow pt-0">
-                  <p className="text-sm text-gray-600 mb-6 flex-grow min-h-[2.5rem]">
-                    {service.detalhes}
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="w-full mt-auto"
-                    onClick={() => onNavigate("service-details", service.id)}
-                  >
-                    Ver Detalhes
-                  </Button>
-                </CardContent>
-              </div>
+              <CardContent className="flex flex-col flex-grow pt-0">
+                <p className="text-sm text-gray-600 mb-6">{service.detalhes}</p>
+                <Button
+                  variant="outline"
+                  className="w-full mt-auto"
+                  onClick={() => onNavigate("service-details", service.id)}
+                >
+                  Ver Detalhes
+                </Button>
+              </CardContent>
             </Card>
           ))}
         </div>
 
-        {}
+        {/* 🔹 Serviços Adicionais */}
         <div className="mt-16 bg-white rounded-lg p-8 shadow-sm">
           <h3 className="text-2xl mb-6 text-center">Serviços Adicionais</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { name: "Transfer Aeroporto", icon: "✈️" },
-              { name: "Lavanderia Express", icon: "👔" },
-              { name: "Baby Sitting", icon: "👶" },
-              { name: "Pet Friendly", icon: "🐕" },
-              { name: "Room Service 24h", icon: "🛎️" },
-              { name: "Aluguel de Carros", icon: "🚗" },
-              { name: "Tour Guiado", icon: "🗺️" },
-              { name: "Wi-Fi Premium", icon: "📶" },
-            ].map((item, index) => (
+            {additionalServices.map((item) => (
               <div
-                key={index}
+                key={item.id}
                 className="text-center p-4 rounded-lg border hover:border-primary transition-colors"
               >
-                <div className="text-3xl mb-2">{item.icon}</div>
-                <p className="text-sm">{item.name}</p>
+                {/* Ícone híbrido: banco → fallback local */}
+                <div className="text-3xl mb-2">
+                  {emojiMap[item.icone ?? ""] || iconMap[item.titulo] || "⭐"}
+                </div>
+                <p className="text-sm font-medium">{item.titulo}</p>
+                <p className="text-xs text-gray-500">{item.descricao}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {}
+        {/* Rodapé */}
         <div className="text-center mt-16 p-8 bg-primary text-white rounded-lg">
           <h3 className="text-2xl mb-4">Precisa de algo especial?</h3>
           <p className="mb-6 opacity-90">
             Nossa equipe está sempre pronta para atender suas necessidades específicas.
           </p>
-          <Button className="bg-white text-primary hover:bg-gray-100">
-            Entre em Contato
-          </Button>
+          <Button className="bg-white text-primary hover:bg-gray-100">Entre em Contato</Button>
         </div>
       </div>
     </div>
