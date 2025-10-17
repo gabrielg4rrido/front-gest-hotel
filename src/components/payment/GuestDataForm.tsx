@@ -113,7 +113,7 @@ export function GuestDataForm({ guestData, onGuestDataChange }: GuestDataFormPro
                 type="CPF"
                 placeholder="xxx.xxx.xxx-xx"
                 value={guestData.cpf}
-                onChange={(e) => updateGuestData({ email: e.target.value })}
+                onChange={(e) => updateGuestData({ cpf: e.target.value })}
               />
             </div>
             <div>

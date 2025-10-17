@@ -75,7 +75,7 @@ export default function App() {
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage onNavigate={handleNavigate} />;
+        return <MyReservationsPage onNavigate={handleNavigate} />;
       case 'rooms':
         return <RoomsPage onNavigate={handleNavigate} />;
       case 'room-details':
