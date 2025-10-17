@@ -152,7 +152,9 @@ export function AuthPages({
           ...(formData.fotoPerfil && { fotoPerfil: formData.fotoPerfil }),
         };
 
-        await apiService.registerCliente(registerData);
+        const registeredCliente = await apiService.registerCliente(
+          registerData
+        );
 
         // Após registrar com sucesso, fazer login automaticamente
         const loginData: LoginData = {
@@ -160,13 +162,15 @@ export function AuthPages({
           senha: formData.password,
         };
 
-        const loginResponse = await apiService.login(loginData);
+        await apiService.login(loginData);
 
+        // Atualizar callback onLogin com dados completos do cliente registrado
         if (onLogin) {
           onLogin({
-            name: loginResponse.usuario.nome,
-            email: loginResponse.usuario.email,
+            name: registeredCliente.nome,
+            email: registeredCliente.email,
             avatar:
+              registeredCliente.fotoPerfil ||
               previewUrl ||
               "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
           });

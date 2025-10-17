@@ -229,10 +229,27 @@ export const apiService = {
 
     const loginResponse: LoginResponse = await response.json();
 
-    // Salvar tokens e dados do usuário
+    // Salvar tokens
     TokenManager.setAccessToken(loginResponse.accessToken);
     TokenManager.setRefreshToken(loginResponse.refreshToken);
-    TokenManager.setUserData(loginResponse.usuario);
+
+    // Buscar dados completos do cliente (incluindo foto de perfil)
+    try {
+      const clienteData = await this.getCliente(loginResponse.usuario.id);
+      // Mesclar dados do login com dados completos do cliente
+      const fullUserData = {
+        ...loginResponse.usuario,
+        fotoPerfil: clienteData.fotoPerfil,
+        cpf: clienteData.cpf,
+        endereco: clienteData.endereco,
+        dataNascimento: clienteData.dataNascimento,
+      };
+      TokenManager.setUserData(fullUserData);
+    } catch (error) {
+      console.error("Erro ao buscar dados completos do cliente:", error);
+      // Se falhar, salvar apenas os dados básicos
+      TokenManager.setUserData(loginResponse.usuario);
+    }
 
     return loginResponse;
   },
