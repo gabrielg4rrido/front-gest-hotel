@@ -1,42 +1,57 @@
-import React, { useState } from 'react';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Separator } from '../components/ui/separator';
-import { Camera, User } from 'lucide-react';
+import React, { useState } from "react";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Separator } from "../components/ui/separator";
+import { Camera, User, Loader2 } from "lucide-react";
+import { apiService, RegisterData, LoginData } from "../services/api";
 
 interface AuthPagesProps {
-  currentPage: 'login' | 'register';
+  currentPage: "login" | "register";
   onNavigate: (page: string) => void;
   onLogin?: (userData: { name: string; email: string; avatar: string }) => void;
 }
 
-export function AuthPages({ currentPage, onNavigate, onLogin }: AuthPagesProps) {
+export function AuthPages({
+  currentPage,
+  onNavigate,
+  onLogin,
+}: AuthPagesProps) {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
-    phone: '',
-    cpf: '',
-    endereco: '',
-    dataNascimento: '',
-    statusCliente: 'ativo',
-    fotoPerfil: null as File | null
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    cpf: "",
+    endereco: "",
+    dataNascimento: "",
+    statusCliente: "ativo",
+    fotoPerfil: null as File | null,
   });
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Limpar erro quando o usuário começar a digitar
+    if (error) setError(null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setFormData(prev => ({ ...prev, fotoPerfil: file }));
-    
+    setFormData((prev) => ({ ...prev, fotoPerfil: file }));
+
     // Criar preview da imagem
     if (file) {
       const reader = new FileReader();
@@ -49,32 +64,130 @@ export function AuthPages({ currentPage, onNavigate, onLogin }: AuthPagesProps) 
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Aqui seria feita a integração com backend/Supabase
-    console.log('Form submitted:', formData);
-    
-    // Simular login bem-sucedido
-    if (currentPage === 'login' && onLogin) {
-      onLogin({
-        name: 'João Silva',
-        email: formData.email || 'joao.silva@email.com',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400'
-      });
-    } else if (currentPage === 'register' && onLogin) {
-      onLogin({
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email,
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400'
-      });
+  const validateForm = () => {
+    if (currentPage === "login") {
+      if (!formData.email || !formData.password) {
+        setError("Por favor, preencha todos os campos");
+        return false;
+      }
+    } else {
+      // Validações para registro
+      if (
+        !formData.firstName ||
+        !formData.lastName ||
+        !formData.email ||
+        !formData.password ||
+        !formData.phone ||
+        !formData.cpf ||
+        !formData.endereco ||
+        !formData.dataNascimento
+      ) {
+        setError("Por favor, preencha todos os campos obrigatórios");
+        return false;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        setError("As senhas não coincidem");
+        return false;
+      }
+
+      if (formData.password.length < 6) {
+        setError("A senha deve ter pelo menos 6 caracteres");
+        return false;
+      }
+
+      // Validação básica de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        setError("Por favor, insira um email válido");
+        return false;
+      }
+
+      // Validação básica de CPF (apenas números)
+      const cpfNumbers = formData.cpf.replace(/\D/g, "");
+      if (cpfNumbers.length !== 11) {
+        setError("CPF deve conter 11 dígitos");
+        return false;
+      }
     }
-    
-    // Simular sucesso e navegar para home
-    alert(currentPage === 'login' ? 'Login realizado com sucesso!' : 'Cadastro realizado com sucesso!');
-    onNavigate('home');
+
+    return true;
   };
 
-  if (currentPage === 'login') {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      if (currentPage === "login") {
+        // Fazer login
+        const loginData: LoginData = {
+          email: formData.email,
+          senha: formData.password,
+        };
+
+        const response = await apiService.login(loginData);
+
+        if (onLogin) {
+          onLogin({
+            name: response.usuario.nome,
+            email: response.usuario.email,
+            avatar:
+              previewUrl ||
+              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
+          });
+        }
+
+        onNavigate("home");
+      } else {
+        // Registrar novo cliente
+        const registerData: RegisterData = {
+          nome: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          senha: formData.password,
+          cpf: formData.cpf.replace(/\D/g, ""), // Remove formatação
+          endereco: formData.endereco,
+          dataNascimento: formData.dataNascimento,
+          telefone: formData.phone,
+        };
+
+        await apiService.registerCliente(registerData);
+
+        // Após registrar com sucesso, fazer login automaticamente
+        const loginData: LoginData = {
+          email: formData.email,
+          senha: formData.password,
+        };
+
+        const loginResponse = await apiService.login(loginData);
+
+        if (onLogin) {
+          onLogin({
+            name: loginResponse.usuario.nome,
+            email: loginResponse.usuario.email,
+            avatar:
+              previewUrl ||
+              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
+          });
+        }
+
+        onNavigate("home");
+      }
+    } catch (error: any) {
+      console.error("Erro na autenticação:", error);
+      setError(error.message || "Ocorreu um erro. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (currentPage === "login") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <Card className="w-full max-w-md">
@@ -84,9 +197,15 @@ export function AuthPages({ currentPage, onNavigate, onLogin }: AuthPagesProps) 
               Acesse sua conta para gerenciar suas reservas
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                  {error}
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="email">E-mail</Label>
                 <Input
@@ -94,11 +213,12 @@ export function AuthPages({ currentPage, onNavigate, onLogin }: AuthPagesProps) 
                   type="email"
                   placeholder="seu@email.com"
                   value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  disabled={isLoading}
                   required
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="password">Senha</Label>
                 <Input
@@ -106,34 +226,43 @@ export function AuthPages({ currentPage, onNavigate, onLogin }: AuthPagesProps) 
                   type="password"
                   placeholder="••••••••"
                   value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
+                  disabled={isLoading}
                   required
                 />
               </div>
-              
-              <Button type="submit" className="w-full">
-                Entrar
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Entrando...
+                  </>
+                ) : (
+                  "Entrar"
+                )}
               </Button>
             </form>
-            
+
             <div className="mt-6">
               <Separator className="my-4" />
               <div className="text-center">
-                <p className="text-sm text-gray-600 mb-4">
-                  Não tem uma conta?
-                </p>
+                <p className="text-sm text-gray-600 mb-4">Não tem uma conta?</p>
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => onNavigate('register')}
+                  onClick={() => onNavigate("register")}
+                  disabled={isLoading}
                 >
                   Criar Conta
                 </Button>
               </div>
             </div>
-            
+
             <div className="mt-4 text-center">
-              <Button variant="link" className="text-sm">
+              <Button variant="link" className="text-sm" disabled={isLoading}>
                 Esqueceu sua senha?
               </Button>
             </div>
@@ -152,9 +281,15 @@ export function AuthPages({ currentPage, onNavigate, onLogin }: AuthPagesProps) 
             Cadastre-se para fazer reservas e acessar ofertas exclusivas
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                {error}
+              </div>
+            )}
+
             {/* Foto de Perfil - Círculo no topo */}
             <div className="flex justify-center mb-6">
               <div className="relative">
@@ -164,6 +299,7 @@ export function AuthPages({ currentPage, onNavigate, onLogin }: AuthPagesProps) 
                   accept="image/*"
                   onChange={handleFileChange}
                   className="hidden"
+                  disabled={isLoading}
                 />
                 <label
                   htmlFor="fotoPerfil"
@@ -180,7 +316,7 @@ export function AuthPages({ currentPage, onNavigate, onLogin }: AuthPagesProps) 
                       <User className="w-16 h-16 text-gray-400" />
                     </div>
                   )}
-                  
+
                   {/* Overlay com ícone de câmera no hover */}
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Camera className="w-10 h-10 text-white" />
@@ -191,123 +327,147 @@ export function AuthPages({ currentPage, onNavigate, onLogin }: AuthPagesProps) 
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="firstName">Nome</Label>
+                <Label htmlFor="firstName">Nome *</Label>
                 <Input
                   id="firstName"
                   placeholder="João"
                   value={formData.firstName}
-                  onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("firstName", e.target.value)
+                  }
+                  disabled={isLoading}
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="lastName">Sobrenome</Label>
+                <Label htmlFor="lastName">Sobrenome *</Label>
                 <Input
                   id="lastName"
                   placeholder="Silva"
                   value={formData.lastName}
-                  onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("lastName", e.target.value)
+                  }
+                  disabled={isLoading}
                   required
                 />
               </div>
             </div>
-            
+
             <div>
-              <Label htmlFor="phone">Telefone</Label>
+              <Label htmlFor="phone">Telefone *</Label>
               <Input
                 id="phone"
                 type="tel"
                 placeholder="(11) 99999-9999"
                 value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
+                disabled={isLoading}
                 required
               />
             </div>
-            
+
             <div>
-              <Label htmlFor="cpf">CPF</Label>
+              <Label htmlFor="cpf">CPF *</Label>
               <Input
                 id="cpf"
                 placeholder="000.000.000-00"
                 value={formData.cpf}
-                onChange={(e) => handleInputChange('cpf', e.target.value)}
+                onChange={(e) => handleInputChange("cpf", e.target.value)}
+                disabled={isLoading}
                 required
               />
             </div>
-            
+
             <div>
-              <Label htmlFor="endereco">Endereço</Label>
+              <Label htmlFor="endereco">Endereço *</Label>
               <Input
                 id="endereco"
                 placeholder="Rua Exemplo, 123"
                 value={formData.endereco}
-                onChange={(e) => handleInputChange('endereco', e.target.value)}
+                onChange={(e) => handleInputChange("endereco", e.target.value)}
+                disabled={isLoading}
                 required
               />
             </div>
-            
+
             <div>
-              <Label htmlFor="dataNascimento">Data de Nascimento</Label>
+              <Label htmlFor="dataNascimento">Data de Nascimento *</Label>
               <Input
                 id="dataNascimento"
                 type="date"
                 value={formData.dataNascimento}
-                onChange={(e) => handleInputChange('dataNascimento', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("dataNascimento", e.target.value)
+                }
+                disabled={isLoading}
                 required
               />
             </div>
-            
+
             <div>
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="email">E-mail *</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="seu@email.com"
                 value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                disabled={isLoading}
                 required
               />
             </div>
-            
+
             <div>
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password">Senha *</Label>
               <Input
                 id="password"
                 type="password"
                 placeholder="••••••••"
                 value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
+                onChange={(e) => handleInputChange("password", e.target.value)}
+                disabled={isLoading}
                 required
               />
+              <p className="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
             </div>
-            
+
             <div>
-              <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+              <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
               <Input
                 id="confirmPassword"
                 type="password"
                 placeholder="••••••••"
                 value={formData.confirmPassword}
-                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("confirmPassword", e.target.value)
+                }
+                disabled={isLoading}
                 required
               />
             </div>
-            
-            <Button type="submit" className="w-full">
-              Criar Conta
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Criando conta...
+                </>
+              ) : (
+                "Criar Conta"
+              )}
             </Button>
           </form>
-          
+
           <div className="mt-6">
             <Separator className="my-4" />
             <div className="text-center">
-              <p className="text-sm text-gray-600 mb-4">
-                Já tem uma conta?
-              </p>
+              <p className="text-sm text-gray-600 mb-4">Já tem uma conta?</p>
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => onNavigate('login')}
+                onClick={() => onNavigate("login")}
+                disabled={isLoading}
               >
                 Fazer Login
               </Button>

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Header, Footer } from './components';
+import React, { useState, useEffect } from "react";
+import { Header, Footer } from "./components";
 import {
   HomePage,
   RoomsPage,
@@ -11,15 +11,18 @@ import {
   UserProfilePage,
   MyReservationsPage,
   PersonalInfoPage,
-  MyTravelsPage
-} from './pages';
+  MyTravelsPage,
+} from "./pages";
+import { apiService, TokenManager } from "./services/api";
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState("home");
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
-  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
+    null
+  );
   const [paymentData, setPaymentData] = useState<{
-    type: 'room' | 'service';
+    type: "room" | "service";
     name: string;
     price: number;
     dates?: {
@@ -35,83 +38,153 @@ export default function App() {
     name: string;
     email: string;
     avatar: string;
-  } | null>({
-    name: 'João Silva',
-    email: 'joao.silva@email.com',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400'
-  });
+  } | null>(null);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Verificar autenticação ao inicializar a aplicação
+  useEffect(() => {
+    const checkAuth = () => {
+      const userData = TokenManager.getUserData();
+      if (userData && apiService.isAuthenticated()) {
+        setUser({
+          name: userData.nome,
+          email: userData.email,
+          avatar:
+            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
+        });
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, []);
 
   const handleNavigate = (page: string, itemId?: number) => {
     setCurrentPage(page);
-    if (page === 'room-details' && itemId) {
+    if (page === "room-details" && itemId) {
       setSelectedRoomId(itemId);
-    } else if (page === 'service-details' && itemId) {
+    } else if (page === "service-details" && itemId) {
       setSelectedServiceId(itemId);
     }
   };
 
-  const handleOpenPayment = (type: 'room' | 'service', data: any) => {
+  const handleOpenPayment = (type: "room" | "service", data: any) => {
+    // Verificar se o usuário está logado antes de abrir o pagamento
+    if (!user) {
+      setCurrentPage("login");
+      return;
+    }
+
     setPaymentData({
       type,
-      name: data.name || '',
+      name: data.name || "",
       price: data.price || 0,
       dates: data.dates,
       guests: data.guests,
-      duration: data.duration
+      duration: data.duration,
     });
-    setCurrentPage('payment');
+    setCurrentPage("payment");
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    setCurrentPage('home');
+  const handleLogout = async () => {
+    try {
+      await apiService.logout();
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+    } finally {
+      setUser(null);
+      setCurrentPage("home");
+    }
   };
 
-  const handleLogin = (userData: { name: string; email: string; avatar: string }) => {
+  const handleLogin = (userData: {
+    name: string;
+    email: string;
+    avatar: string;
+  }) => {
     setUser(userData);
-    setCurrentPage('home');
+    setCurrentPage("home");
   };
+
+  // Verificar se páginas protegidas precisam de autenticação
+  const protectedPages = [
+    "profile",
+    "personal-info",
+    "my-reservations",
+    "my-travels",
+    "payment",
+  ];
+
+  useEffect(() => {
+    if (protectedPages.includes(currentPage) && !user) {
+      setCurrentPage("login");
+    }
+  }, [currentPage, user]);
+
+  // Mostrar loading enquanto verifica autenticação
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          <p className="mt-4 text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   const renderCurrentPage = () => {
     switch (currentPage) {
-      case 'home':
+      case "home":
         return <HomePage onNavigate={handleNavigate} />;
-      case 'rooms':
+      case "rooms":
         return <RoomsPage onNavigate={handleNavigate} />;
-      case 'room-details':
+      case "room-details":
         return selectedRoomId ? (
-          <RoomDetailsPage 
-            roomId={selectedRoomId} 
+          <RoomDetailsPage
+            roomId={selectedRoomId}
             onNavigate={handleNavigate}
             onOpenPayment={handleOpenPayment}
           />
         ) : (
           <RoomsPage onNavigate={handleNavigate} />
         );
-      case 'services':
+      case "services":
         return <ServicesPage onNavigate={handleNavigate} />;
-      case 'service-details':
+      case "service-details":
         return selectedServiceId ? (
-          <ServiceDetailsPage 
-            serviceId={selectedServiceId} 
+          <ServiceDetailsPage
+            serviceId={selectedServiceId}
             onNavigate={handleNavigate}
           />
         ) : (
           <ServicesPage onNavigate={handleNavigate} />
         );
-      case 'profile':
+      case "profile":
         return <UserProfilePage onNavigate={handleNavigate} />;
-      case 'personal-info':
+      case "personal-info":
         return <PersonalInfoPage onNavigate={handleNavigate} />;
-      case 'my-reservations':
+      case "my-reservations":
         return <MyReservationsPage onNavigate={handleNavigate} />;
-      case 'my-travels':
+      case "my-travels":
         return <MyTravelsPage onNavigate={handleNavigate} />;
-      case 'payment':
-        return <PaymentPage onNavigate={handleNavigate} bookingData={paymentData || undefined} />;
-      case 'login':
-      case 'register':
-        return <AuthPages currentPage={currentPage} onNavigate={handleNavigate} onLogin={handleLogin} />;
+      case "payment":
+        return (
+          <PaymentPage
+            onNavigate={handleNavigate}
+            bookingData={paymentData || undefined}
+          />
+        );
+      case "login":
+      case "register":
+        return (
+          <AuthPages
+            currentPage={currentPage}
+            onNavigate={handleNavigate}
+            onLogin={handleLogin}
+          />
+        );
       default:
         return <HomePage onNavigate={handleNavigate} />;
     }
@@ -119,17 +192,15 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header 
-        currentPage={currentPage} 
-        onNavigate={handleNavigate} 
+      <Header
+        currentPage={currentPage}
+        onNavigate={handleNavigate}
         user={user}
         onLogout={handleLogout}
       />
-      
-      <main className="flex-1">
-        {renderCurrentPage()}
-      </main>
-      
+
+      <main className="flex-1">{renderCurrentPage()}</main>
+
       <Footer />
     </div>
   );
