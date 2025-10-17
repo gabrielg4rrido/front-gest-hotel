@@ -1,14 +1,14 @@
 import React from "react";
-import { Button } from "../components/ui/button";
+import { Button } from "../../components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { SearchForm } from "../components/SearchForm";
+} from "../../components/ui/card";
+import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { SearchForm } from "../../components/SearchForm";
 
 interface HomePageProps {
   onNavigate: (page: string, roomId?: number) => void;
@@ -18,8 +18,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
   const features = [
     {
       title: "Quartos Luxuosos",
-      description:
-        "Acomodações confortáveis com vista para o mar",
+      description: "Acomodações confortáveis com vista para o mar",
       icon: "🏨",
     },
     {
@@ -39,9 +38,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
     checkOut: string;
     guests: number;
   }) => {
-    // Store search data in sessionStorage for use in rooms page
-    sessionStorage.setItem('hotelSearch', JSON.stringify(searchData));
-    onNavigate('rooms');
+    sessionStorage.setItem("hotelSearch", JSON.stringify(searchData));
+    onNavigate("rooms");
   };
 
   return (
@@ -54,8 +52,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
             Bem-vindo ao Hotel Carioca Palace
           </h1>
           <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
-            Experimente o luxo e conforto em uma localização
-            paradisíaca. Sua estadia dos sonhos começa aqui.
+            Experimente o luxo e conforto em uma localização paradisíaca. Sua
+            estadia dos sonhos começa aqui.
           </p>
         </div>
       </section>
@@ -75,9 +73,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
               Por que escolher o Hotel Paradise?
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Oferecemos uma experiência única com serviços de
-              primeira classe e instalações modernas para tornar
-              sua estadia inesquecível.
+              Oferecemos uma experiência única com serviços de primeira classe e
+              instalações modernas para tornar sua estadia inesquecível.
             </p>
           </div>
 
@@ -88,15 +85,11 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 className="text-center hover:shadow-lg transition-shadow"
               >
                 <CardHeader>
-                  <div className="text-4xl mb-4">
-                    {feature.icon}
-                  </div>
+                  <div className="text-4xl mb-4">{feature.icon}</div>
                   <CardTitle>{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription>
-                    {feature.description}
-                  </CardDescription>
+                  <CardDescription>{feature.description}</CardDescription>
                 </CardContent>
               </Card>
             ))}
@@ -107,12 +100,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
       {/* CTA Section */}
       <section className="py-20 bg-primary text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl mb-6">
-            Pronto para sua próxima aventura?
-          </h2>
+          <h2 className="text-4xl mb-6">Pronto para sua próxima aventura?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Reserve agora e ganhe 15% de desconto na sua
-            primeira estadia
+            Reserve agora e ganhe 15% de desconto na sua primeira estadia
           </p>
           <Button
             size="lg"

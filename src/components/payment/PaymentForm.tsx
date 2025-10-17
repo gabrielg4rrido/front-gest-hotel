@@ -1,11 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import { CreditCard, Banknote } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { CreditCard, Banknote, Loader2 } from "lucide-react";
 
 interface CardData {
   number: string;
@@ -49,16 +55,23 @@ interface ApiPaymentMethod {
 
 interface NormalizedPaymentMethod {
   id: string;
-  value: string;          // usado no RadioGroup
-  label: string;
+  value: string;
   requiresCard: boolean;
   discountPercent: number;
-  icon: 'credit' | 'pix' | 'default';
+  icon: "credit" | "pix" | "default";
 }
 
-const METHOD_MAP: Record<number, Omit<NormalizedPaymentMethod, 'id' | 'label'>> = {
-  1: { value: 'credit', requiresCard: true,  discountPercent: 0, icon: 'credit' },
-  2: { value: 'pix',    requiresCard: false, discountPercent: 5, icon: 'pix' }
+const METHOD_MAP: Record<
+  number,
+  Omit<NormalizedPaymentMethod, "id" | "label">
+> = {
+  1: {
+    value: "credit",
+    requiresCard: true,
+    discountPercent: 0,
+    icon: "credit",
+  },
+  2: { value: "pix", requiresCard: false, discountPercent: 5, icon: "pix" },
 };
 
 function normalize(api: ApiPaymentMethod): NormalizedPaymentMethod {
@@ -66,12 +79,12 @@ function normalize(api: ApiPaymentMethod): NormalizedPaymentMethod {
     value: `tipo-${api.tipo}`,
     requiresCard: false,
     discountPercent: 0,
-    icon: 'default' as const
+    icon: "default" as const,
   };
   return {
     id: api.id,
     label: api.tipoLabel,
-    ...base
+    ...base,
   };
 }
 
@@ -85,7 +98,7 @@ export function PaymentForm({
   onInstallmentsChange,
   onCardDataChange,
   onPayment,
-  onCancel
+  onCancel,
 }: PaymentFormProps) {
   const [methods, setMethods] = useState<NormalizedPaymentMethod[]>([]);
   const [loadingMethods, setLoadingMethods] = useState(false);
@@ -100,35 +113,40 @@ export function PaymentForm({
       setLoadingMethods(true);
       setMethodsError(null);
       try {
-        const res = await fetch('http://localhost:3001/api/metodo-pagamento');
-        if (!res.ok) throw new Error('Falha ao buscar métodos');
+        const res = await fetch("http://localhost:3002/api/metodo-pagamento");
+        if (!res.ok) throw new Error("Falha ao buscar métodos");
 
         const json: ApiPaymentMethodsResponse = await res.json();
         if (!json.success) {
-          throw new Error(json.message || 'Falha ao buscar métodos');
+          throw new Error(json.message || "Falha ao buscar métodos");
         }
 
         const raw = json.data?.methods ?? [];
-        const enabled = raw.filter(m => m.status);
+        const enabled = raw.filter((m) => m.status);
         const normalized = enabled.map(normalize);
 
         if (active) {
           setMethods(normalized);
-          if (!normalized.some(m => m.value === paymentMethod) && normalized.length) {
+          if (
+            !normalized.some((m) => m.value === paymentMethod) &&
+            normalized.length
+          ) {
             onPaymentMethodChange(normalized[0].value);
           }
         }
       } catch (e: any) {
-        if (active) setMethodsError(e.message || 'Erro ao carregar métodos');
+        if (active) setMethodsError(e.message || "Erro ao carregar métodos");
       } finally {
         if (active) setLoadingMethods(false);
       }
     }
     load();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [paymentMethod, onPaymentMethodChange]);
 
-  const selectedMethod = methods.find(m => m.value === paymentMethod);
+  const selectedMethod = methods.find((m) => m.value === paymentMethod);
   const discountPercent = selectedMethod?.discountPercent ?? 0;
   const totalWithDiscount = discountPercent
     ? total * (1 - discountPercent / 100)
@@ -136,9 +154,9 @@ export function PaymentForm({
 
   const renderIcon = (m: NormalizedPaymentMethod) => {
     switch (m.icon) {
-      case 'credit':
+      case "credit":
         return <CreditCard className="h-5 w-5" />;
-      case 'pix':
+      case "pix":
         return <Banknote className="h-5 w-5" />;
       default:
         return <CreditCard className="h-5 w-5" />;
@@ -157,17 +175,20 @@ export function PaymentForm({
         <div>
           <Label className="text-base mb-3 block">Forma de Pagamento</Label>
           {loadingMethods && (
-            <div className="text-sm text-gray-500">Carregando métodos...</div>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Carregando métodos...
+            </div>
           )}
-            {methodsError && (
-              <div className="text-sm text-red-600">{methodsError}</div>
-            )}
+          {methodsError && (
+            <div className="text-sm text-red-600">{methodsError}</div>
+          )}
           {!loadingMethods && !methodsError && (
             <RadioGroup
               value={paymentMethod}
               onValueChange={onPaymentMethodChange}
             >
-              {methods.map(m => (
+              {methods.map((m) => (
                 <div
                   key={m.id}
                   className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50"
@@ -176,12 +197,15 @@ export function PaymentForm({
                   {renderIcon(m)}
                   <Label htmlFor={m.id} className="flex-1 cursor-pointer">
                     {m.label}
-                    {m.discountPercent > 0 && ` (${m.discountPercent}% de desconto)`}
+                    {m.discountPercent > 0 &&
+                      ` (${m.discountPercent}% de desconto)`}
                   </Label>
                 </div>
               ))}
               {methods.length === 0 && (
-                <div className="text-sm text-gray-500">Nenhum método disponível.</div>
+                <div className="text-sm text-gray-500">
+                  Nenhum método disponível.
+                </div>
               )}
             </RadioGroup>
           )}
@@ -246,10 +270,13 @@ export function PaymentForm({
               </div>
             </div>
 
-            {paymentMethod === 'credit' && (
+            {paymentMethod === "credit" && (
               <div>
                 <Label className="text-base mb-3 block">Parcelamento</Label>
-                <Select value={installments} onValueChange={onInstallmentsChange}>
+                <Select
+                  value={installments}
+                  onValueChange={onInstallmentsChange}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o parcelamento" />
                   </SelectTrigger>
@@ -273,11 +300,7 @@ export function PaymentForm({
         )}
 
         <div className="flex gap-4 pt-6">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={onCancel}
-          >
+          <Button variant="outline" className="flex-1" onClick={onCancel}>
             Cancelar
           </Button>
           <Button
@@ -288,7 +311,7 @@ export function PaymentForm({
           >
             {selectedMethod
               ? `Pagar R$ ${totalWithDiscount.toFixed(2)}`
-              : 'Selecione um método'}
+              : "Selecione um método"}
           </Button>
         </div>
       </CardContent>
