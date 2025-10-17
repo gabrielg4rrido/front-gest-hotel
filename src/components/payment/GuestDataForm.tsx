@@ -16,6 +16,7 @@ interface GuestData {
   totalGuests: number;
   firstName: string;
   lastName: string;
+  cpf: string;
   email: string;
   isMainGuest: string;
 }
@@ -115,17 +116,49 @@ export function GuestDataForm({
                 onChange={(e) => updateGuestData({ lastName: e.target.value })}
               />
             </div>
-          </div>
 
-          <div>
-            <Label htmlFor="email">E-mail</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="exemplo@email.com"
-              value={guestData.email}
-              onChange={(e) => updateGuestData({ email: e.target.value })}
-            />
+            <div>
+              <Label htmlFor="CPF">CPF</Label>
+              <Input
+                id="CPF"
+                type="CPF"
+                placeholder="xxx.xxx.xxx-xx"
+                value={guestData.cpf}
+                onChange={(e) => updateGuestData({ cpf: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="dataDeNascimento">Data de Nascimento</Label>
+              <Input
+                id="birthday"
+                type="date"
+                placeholder="dd / mm / aaaa"
+                className="w-full"
+                required
+                style={{ color: "gray" }}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="exemplo@email.com"
+                value={guestData.email}
+                onChange={(e) => updateGuestData({ email: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="phone">Telefone</Label>
+              <Input
+                id="phone"
+                placeholder="(11) 99999-9999"
+                value={guestData.phone}
+                onChange={(e) => updateGuestData({ phone: e.target.value })}
+              />
+            </div>
           </div>
         </div>
       </CardContent>

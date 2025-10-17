@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Card,
   CardContent,
@@ -14,353 +15,238 @@ import {
   TabsList,
   TabsTrigger,
 } from "../../components/ui/tabs";
-import {
-  Calendar,
-  MapPin,
-  Users,
-  Clock,
-  CreditCard,
-  Download,
-  Eye,
-} from "lucide-react";
+import { MapPin, CreditCard } from "lucide-react";
 
-interface MyReservationsPageProps {
-  onNavigate: (page: string) => void;
-}
+const Calendar = ({ className }: { className: string }) => (
+  <svg
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+    <line x1="16" x2="16" y1="2" y2="6" />
+    <line x1="8" x2="8" y1="2" y2="6" />
+    <line x1="3" x2="21" y1="10" y2="10" />
+  </svg>
+);
+const Users = ({ className }: { className: string }) => (
+  <svg
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+const Clock = ({ className }: { className: string }) => (
+  <svg
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+const Download = ({ className }: { className: string }) => (
+  <svg
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" x2="12" y1="15" y2="3" />
+  </svg>
+);
+const Eye = ({ className }: { className: string }) => (
+  <svg
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
 
+// --- INTERFACES (Definição de tipos para o TypeScript) ---
 interface Reservation {
   id: string;
   type: "room" | "service";
   name: string;
-  dates: {
-    checkIn: string;
-    checkOut: string;
-  };
+  dates: { checkIn: string; checkOut: string };
   guests: number;
   price: number;
   status: "confirmed" | "pending" | "cancelled" | "completed";
   image: string;
-  additionalServices?: string[];
 }
 
-export function MyReservationsPage({ onNavigate }: MyReservationsPageProps) {
-  const [reservations] = useState<Reservation[]>([
-    {
-      id: "RES001",
-      type: "room",
-      name: "Suíte Master com Vista Mar",
-      dates: {
-        checkIn: "2025-12-20",
-        checkOut: "2025-12-25",
-      },
-      guests: 2,
-      price: 2800,
-      status: "confirmed",
-      image:
-        "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=400",
-      additionalServices: [
-        "Spa & Wellness",
-        "Restaurante Gourmet",
-        "Concierge 24h",
-      ],
-    },
-    {
-      id: "RES002",
-      type: "room",
-      name: "Quarto Deluxe",
-      dates: {
-        checkIn: "2025-10-15",
-        checkOut: "2025-10-18",
-      },
-      guests: 1,
-      price: 1050,
-      status: "completed",
-      image:
-        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400",
-      additionalServices: ["Academia Premium"],
-    },
-    {
-      id: "RES003",
-      type: "room",
-      name: "Quarto Standard",
-      dates: {
-        checkIn: "2024-08-10",
-        checkOut: "2024-08-12",
-      },
-      guests: 2,
-      price: 600,
-      status: "completed",
-      image:
-        "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400",
-    },
-  ]);
+// --- COMPONENTE PRINCIPAL ---
+export function MyReservationsPage({
+  onNavigate,
+}: {
+  onNavigate: (page: string) => void;
+}) {
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const getStatusColor = (status: string) => {
-    const colors = {
-      confirmed: "bg-green-100 text-green-800",
-      pending: "bg-yellow-100 text-yellow-800",
-      cancelled: "bg-red-100 text-red-800",
-      completed: "bg-blue-100 text-blue-800",
-    };
-    return colors[status as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  const fetchReservations = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("http://localhost:3001/api/reservas");
+
+      const mappedReservations = response.data.map((apiRes: any) => ({
+        id: apiRes.idReserva,
+        name: apiRes.nomeHospede,
+        dates: {
+          checkIn: apiRes.dataEntrada.split("T")[0],
+          checkOut: apiRes.dataSaida.split("T")[0],
+        },
+        guests: apiRes.quantidadeHospedes,
+        price: parseFloat(apiRes.precoTotal),
+        status:
+          new Date(apiRes.dataSaida) < new Date() ? "completed" : "confirmed",
+        image: `https://placehold.co/600x400/334155/FFFFFF?text=${encodeURIComponent(
+          apiRes.nomeHospede
+        )}`,
+      }));
+
+      setReservations(mappedReservations);
+    } catch (err) {
+      setError(
+        "Não foi possível carregar as reservas. Verifique se o servidor da API está a ser executado."
+      );
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getStatusText = (status: string) => {
-    const texts = {
-      confirmed: "Confirmada",
-      pending: "Pendente",
-      cancelled: "Cancelada",
-      completed: "Concluída",
-    };
-    return texts[status as keyof typeof texts] || status;
+  useEffect(() => {
+    fetchReservations();
+  }, []);
+
+  const handleCancelReservation = async (reservationId: string) => {
+    if (window.confirm("Tem a certeza de que deseja cancelar esta reserva?")) {
+      try {
+        await axios.delete(
+          `http://localhost:3001/api/reservas/${reservationId}`
+        );
+        // Após o cancelamento, busca novamente a lista atualizada de reservas
+        fetchReservations();
+      } catch (error) {
+        alert(
+          "Não foi possível cancelar a reserva. Tente novamente mais tarde."
+        );
+        console.error("Erro ao cancelar reserva:", error);
+      }
+    }
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("pt-BR");
-  };
-
-  const calculateDays = (checkIn: string, checkOut: string) => {
-    const start = new Date(checkIn);
-    const end = new Date(checkOut);
-    return Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
-  };
-
-  const activeReservations = reservations.filter(
-    (r) => r.status === "confirmed" || r.status === "pending"
-  );
-  const pastReservations = reservations.filter(
-    (r) => r.status === "completed" || r.status === "cancelled"
-  );
-
-  const ReservationCard = ({ reservation }: { reservation: Reservation }) => (
-    <Card className="overflow-hidden">
-      <div className="flex flex-col lg:flex-row">
-        <div className="lg:w-1/3 aspect-video lg:aspect-square">
-          <img
-            src={reservation.image}
-            alt={reservation.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        <div className="flex-1 p-6">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h3 className="text-xl font-semibold mb-2">{reservation.name}</h3>
-              <Badge className={getStatusColor(reservation.status)}>
-                {getStatusText(reservation.status)}
-              </Badge>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Código da Reserva</p>
-              <p className="font-mono text-sm">{reservation.id}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-4 w-4 text-gray-400" />
-              <div>
-                <p>Check-in: {formatDate(reservation.dates.checkIn)}</p>
-                <p>Check-out: {formatDate(reservation.dates.checkOut)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Users className="h-4 w-4 text-gray-400" />
-              <span>
-                {reservation.guests}{" "}
-                {reservation.guests === 1 ? "hóspede" : "hóspedes"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="h-4 w-4 text-gray-400" />
-              <span>
-                {calculateDays(
-                  reservation.dates.checkIn,
-                  reservation.dates.checkOut
-                )}{" "}
-                {calculateDays(
-                  reservation.dates.checkIn,
-                  reservation.dates.checkOut
-                ) === 1
-                  ? "diária"
-                  : "diárias"}
-              </span>
-            </div>
-          </div>
-
-          {reservation.additionalServices &&
-            reservation.additionalServices.length > 0 && (
-              <div className="mb-4">
-                <p className="text-sm font-medium mb-2">Serviços adicionais:</p>
-                <div className="flex flex-wrap gap-2">
-                  {reservation.additionalServices.map((service, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {service}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-          <Separator className="my-4" />
-
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-lg font-semibold">
-                R$ {reservation.price.toFixed(2)}
-              </p>
-              <p className="text-sm text-gray-600">Total pago</p>
-            </div>
-
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Eye className="h-4 w-4 mr-2" />
-                Detalhes
-              </Button>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Recibo
-              </Button>
-              {reservation.status === "confirmed" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-red-600 hover:text-red-700"
-                >
-                  Cancelar
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
+  if (loading) {
+    return (
+      <div className="text-center p-8">A carregar as suas reservas...</div>
+    );
+  }
+  if (error) {
+    return <div className="text-center p-8 text-red-600">{error}</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => onNavigate("home")}
-            className="mb-4"
-          >
-            ← Voltar
-          </Button>
-          <h1 className="text-3xl mb-2">Minhas Reservas</h1>
-          <p className="text-gray-600">
-            Acompanhe suas reservas e histórico de hospedagens
-          </p>
-        </div>
-
-        {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {activeReservations.length}
-              </div>
-              <p className="text-sm text-gray-600">Reservas Ativas</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {pastReservations.length}
-              </div>
-              <p className="text-sm text-gray-600">Reservas Passadas</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-600">
-                {reservations.reduce(
-                  (acc, r) =>
-                    acc + calculateDays(r.dates.checkIn, r.dates.checkOut),
-                  0
-                )}
-              </div>
-              <p className="text-sm text-gray-600">Total de Diárias</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-orange-600">
-                R${" "}
-                {reservations.reduce((acc, r) => acc + r.price, 0).toFixed(0)}
-              </div>
-              <p className="text-sm text-gray-600">Total Gasto</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Reservas */}
-        <Tabs defaultValue="active" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="active">
-              Reservas Ativas ({activeReservations.length})
-            </TabsTrigger>
-            <TabsTrigger value="past">
-              Histórico ({pastReservations.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="active" className="space-y-6">
-            {activeReservations.length > 0 ? (
-              activeReservations.map((reservation) => (
-                <ReservationCard
-                  key={reservation.id}
-                  reservation={reservation}
-                />
-              ))
-            ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <div className="text-gray-400 mb-4">
-                    <Calendar className="h-16 w-16 mx-auto" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    Nenhuma reserva ativa
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Minhas Reservas</h1>
+      <div className="space-y-6">
+        {reservations.length > 0 ? (
+          reservations.map((reservation) => (
+            <div
+              key={reservation.id}
+              className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col md:flex-row"
+            >
+              <img
+                src={reservation.image}
+                alt={reservation.name}
+                className="w-full md:w-1/3 h-48 md:h-auto object-cover"
+              />
+              <div className="p-6 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold mb-2">
+                    {reservation.name}
                   </h3>
-                  <p className="text-gray-600 mb-4">
-                    Você não possui reservas confirmadas ou pendentes no
-                    momento.
+                  <p className="text-sm text-gray-600">
+                    Check-in:{" "}
+                    {new Date(reservation.dates.checkIn).toLocaleDateString(
+                      "pt-BR",
+                      { timeZone: "UTC" }
+                    )}{" "}
+                    | Check-out:{" "}
+                    {new Date(reservation.dates.checkOut).toLocaleDateString(
+                      "pt-BR",
+                      { timeZone: "UTC" }
+                    )}
                   </p>
-                  <Button onClick={() => onNavigate("rooms")}>
-                    Fazer Nova Reserva
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="past" className="space-y-6">
-            {pastReservations.length > 0 ? (
-              pastReservations.map((reservation) => (
-                <ReservationCard
-                  key={reservation.id}
-                  reservation={reservation}
-                />
-              ))
-            ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <div className="text-gray-400 mb-4">
-                    <Clock className="h-16 w-16 mx-auto" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    Nenhuma reserva no histórico
-                  </h3>
-                  <p className="text-gray-600">
-                    Suas reservas passadas aparecerão aqui.
+                  <p className="text-sm text-gray-600">
+                    {reservation.guests} hóspede(s)
                   </p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+                </div>
+                <div className="flex justify-between items-center mt-4">
+                  <p className="text-lg font-semibold">
+                    R$ {reservation.price.toFixed(2)}
+                  </p>
+                  <button
+                    onClick={() => handleCancelReservation(reservation.id)}
+                    className="px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center p-8 border rounded-lg">
+            <p>Não foram encontradas reservas.</p>
+          </div>
+        )}
       </div>
     </div>
   );
