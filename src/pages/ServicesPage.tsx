@@ -121,10 +121,15 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
             <Card key={service.id} className="overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full">
               <div className="relative h-48 w-full">
                 <ImageWithFallback
-                  src={service.imagem}
+                  src={
+                    service.imagem && service.imagem.startsWith("data:image")
+                      ? service.imagem
+                      : `data:image/jpeg;base64,${service.imagem || ""}`
+                  }
                   alt={service.titulo}
                   className="w-full h-full object-cover"
                 />
+
               </div>
 
               <CardHeader className="pb-3">

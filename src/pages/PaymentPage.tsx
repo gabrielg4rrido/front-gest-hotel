@@ -27,7 +27,6 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     cvv: ''
   });
 
-
   const [guestData, setGuestData] = useState({
     totalGuests: bookingData?.guests || 2,
     firstName: '',
@@ -37,11 +36,22 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     isMainGuest: 'main'
   });
 
-
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [additionalServices, setAdditionalServices] = useState<any[]>([]);
 
+  // 🔹 Mapeamento de ícones armazenados no banco (campo "icone")
+  const emojiMap: Record<string, string> = {
+    "transfer": "✈️",
+    "lavanderia": "👔",
+    ":baby:": "👶",
+    ":dog:": "🐕",
+    ":bell:": "🛎️",
+    ":car:": "🚗",
+    ":map:": "🗺️",
+    ":wifi:": "📶",
+  };
 
+  // 🔹 Busca serviços adicionais direto do back-end
   useEffect(() => {
     fetch("http://localhost:3001/api/additional-services")
       .then((res) => res.json())
@@ -52,15 +62,8 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
           name: item.titulo,
           description: item.descricao,
           price: Number(item.preco) || 0,
-          icon:
-            item.titulo === "Restaurante Gourmet" ? "🍽️" :
-              item.titulo === "Spa & Wellness" ? "💆" :
-                item.titulo === "Academia Premium" ? "💪" :
-                  item.titulo === "Concierge 24h" ? "🎩" :
-                    item.titulo === "Transfer Aeroporto" ? "✈️" :
-                      item.titulo === "Lavanderia Express" ? "👔" :
-                        "⭐",
-
+          icon: emojiMap[item.icone] || "⭐", // usa ícone do banco ou fallback
+          included: item.incluso === 1, // para marcar como incluso
         }));
 
         setAdditionalServices(formatted);
@@ -76,6 +79,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     );
   };
 
+  // ⬇️ RESTANTE DO CÓDIGO PERMANECE IGUAL
   const getBookingData = () => {
     if (bookingData) return bookingData;
     const sessionData = sessionStorage.getItem('paymentData');
@@ -134,7 +138,6 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-6xl">
-        {}
         <div className="mb-8">
           <Button
             variant="ghost"
@@ -150,7 +153,6 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {}
           <div className="lg:col-span-1">
             <BookingSummary
               booking={booking}
@@ -164,20 +166,18 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            {}
             <GuestDataForm
               guestData={guestData}
               onGuestDataChange={setGuestData}
             />
 
-            {}
+            {/* 🔹 Agora os serviços vêm do backend */}
             <AdditionalServices
               additionalServices={additionalServices}
               selectedServices={selectedServices}
               onServiceToggle={handleServiceToggle}
             />
 
-            {}
             <PaymentForm
               paymentMethod={paymentMethod}
               installments={installments}
