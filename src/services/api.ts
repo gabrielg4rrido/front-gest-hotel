@@ -308,6 +308,37 @@ export const apiService = {
     return response.json();
   },
 
+  async uploadFotoPerfil(id: string, file: File): Promise<Cliente> {
+    const formData = new FormData();
+    // O backend (ClienteController) espera um campo chamado "fotoPerfil"
+    formData.append("fotoPerfil", file);
+
+    // Precisamos usar 'fetch' diretamente para FormData,
+    // mas vamos pegar o token de autenticação
+    const token = TokenManager.getAccessToken();
+    const headers: HeadersInit = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    // AVISO: Estou assumindo que a rota do seu backend para esta função
+    // seja '/clientes/:id/foto'. Verifique no seu arquivo de rotas do backend se for diferente.
+    const response = await fetch(`${API_BASE_URL}/clientes/${id}/foto`, {
+      method: "POST", // Pode ser 'POST' ou 'PUT' dependendo da sua API
+      headers: headers,
+      body: formData,
+      // Não definir Content-Type para FormData, o browser faz isso
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      // Lembre-se que seu backend retorna a chave "erro"
+      throw new Error(errorData.erro || "Erro ao enviar foto");
+    }
+
+    return response.json();
+  },
+
   // Renovar token
   async refreshToken(): Promise<{ accessToken: string }> {
     const refreshToken = TokenManager.getRefreshToken();
