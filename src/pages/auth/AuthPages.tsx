@@ -32,7 +32,7 @@ export function AuthPages({
     cpf: "",
     endereco: "",
     dataNascimento: "",
-    // 1. ADICIONADO O CAMPO 'telefone' AO ESTADO INICIAL
+    // 1. CAMPO 'telefone' INCLUÍDO NO ESTADO
     telefone: "",
     statusCliente: "ativo",
     fotoPerfil: null as File | null,
@@ -44,16 +44,32 @@ export function AuthPages({
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Limpar erro quando o usuário começar a digitar
     if (error) setError(null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // ...código existente sem alterações...
+    const file = e.target.files?.[0] || null;
+    setFormData((prev) => ({ ...prev, fotoPerfil: file }));
+
+    // Criar preview da imagem
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewUrl(null);
+    }
   };
 
   const validateForm = () => {
     if (currentPage === "login") {
-      // ...código de validação de login...
+      if (!formData.email || !formData.password) {
+        setError("Por favor, preencha todos os campos");
+        return false;
+      }
     } else {
       // Validações para registro
       if (
@@ -63,15 +79,38 @@ export function AuthPages({
         !formData.cpf ||
         !formData.endereco ||
         !formData.dataNascimento ||
-        // 2. ADICIONADA A VALIDAÇÃO DO CAMPO 'telefone'
+        // 2. CAMPO 'telefone' INCLUÍDO NA VALIDAÇÃO
         !formData.telefone
       ) {
         setError("Por favor, preencha todos os campos obrigatórios");
         return false;
       }
 
-      // ...outras validações existentes...
+      if (formData.password !== formData.confirmPassword) {
+        setError("As senhas não coincidem");
+        return false;
+      }
+
+      if (formData.password.length < 6) {
+        setError("A senha deve ter pelo menos 6 caracteres");
+        return false;
+      }
+
+      // Validação básica de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        setError("Por favor, insira um email válido");
+        return false;
+      }
+
+      // Validação básica de CPF (apenas números)
+      const cpfNumbers = formData.cpf.replace(/\D/g, "");
+      if (cpfNumbers.length !== 11) {
+        setError("CPF deve conter 11 dígitos");
+        return false;
+      }
     }
+
     return true;
   };
 
@@ -87,7 +126,24 @@ export function AuthPages({
 
     try {
       if (currentPage === "login") {
-        // ...código de login sem alterações...
+        const loginData: LoginData = {
+          email: formData.email,
+          senha: formData.password,
+        };
+
+        const response = await apiService.login(loginData);
+
+        if (onLogin) {
+          onLogin({
+            name: response.usuario.nome,
+            email: response.usuario.email,
+            avatar:
+              previewUrl ||
+              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
+          });
+        }
+
+        onNavigate("home");
       } else {
         // Registrar novo cliente
         const registerData: RegisterData = {
@@ -95,27 +151,133 @@ export function AuthPages({
           email: formData.email,
           senha: formData.password,
           cpf: formData.cpf.replace(/\D/g, ""),
+          // 3. CAMPO 'telefone' INCLUÍDO NO ENVIO
+          telefone: formData.telefone.replace(/\D/g, ""),
           endereco: formData.endereco,
           dataNascimento: formData.dataNascimento,
-          // 3. ADICIONADO O CAMPO 'telefone' AO OBJETO ENVIADO PARA A API
-          telefone: formData.telefone.replace(/\D/g, ""),
           ...(formData.fotoPerfil && { fotoPerfil: formData.fotoPerfil }),
         };
 
-        const registeredCliente = await apiService.registerCliente(registerData);
-        // ...resto do código de registro e login automático...
+        const registeredCliente = await apiService.registerCliente(
+          registerData
+        );
+
+        // Após registrar com sucesso, fazer login automaticamente
+        const loginData: LoginData = {
+          email: formData.email,
+          senha: formData.password,
+        };
+
+        await apiService.login(loginData);
+
+        // Atualizar callback onLogin com dados completos do cliente registrado
+        if (onLogin) {
+          onLogin({
+            name: registeredCliente.nome,
+            email: registeredCliente.email,
+            avatar:
+              registeredCliente.fotoPerfil ||
+              previewUrl ||
+              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
+          });
+        }
+
+        onNavigate("home");
       }
     } catch (error: any) {
-      // ...código de erro sem alterações...
+      console.error("Erro na autenticação:", error);
+      setError(error.message || "Ocorreu um erro. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
   };
 
   if (currentPage === "login") {
-    // ...JSX do formulário de login sem alterações...
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Entrar</CardTitle>
+            <CardDescription>
+              Acesse sua conta para gerenciar suas reservas
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <Label htmlFor="email">E-mail</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  disabled={isLoading}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
+                  disabled={isLoading}
+                  required
+                />
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Entrando...
+                  </>
+                ) : (
+                  "Entrar"
+                )}
+              </Button>
+            </form>
+
+            <div className="mt-6">
+              <Separator className="my-4" />
+              <div className="text-center">
+                <p className="text-sm text-gray-600 mb-4">Não tem uma conta?</p>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => onNavigate("register")}
+                  disabled={isLoading}
+                >
+                  Criar Conta
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-4 text-center">
+              <Button variant="link" className="text-sm" disabled={isLoading}>
+                Esqueceu sua senha?
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
+  // ESTE É O FORMULÁRIO DE "CRIAR CONTA" ATUALIZADO
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
       <Card className="w-full max-w-md">
@@ -128,6 +290,46 @@ export function AuthPages({
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                {error}
+              </div>
+            )}
+
+            {/* Bloco de Foto de Perfil (RESTAURADO) */}
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <input
+                  id="fotoPerfil"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  disabled={isLoading}
+                />
+                <label
+                  htmlFor="fotoPerfil"
+                  className="relative block w-32 h-32 rounded-full overflow-hidden cursor-pointer group border-4 border-gray-200 hover:border-primary transition-colors"
+                >
+                  {previewUrl ? (
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                      <User className="w-16 h-16 text-gray-400" />
+                    </div>
+                  )}
+
+                  {/* Overlay com ícone de câmera no hover */}
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Camera className="w-10 h-10 text-white" />
+                  </div>
+                </label>
+              </div>
+            </div>
 
             <div>
               <Label htmlFor="nome">Nome *</Label>
@@ -153,7 +355,7 @@ export function AuthPages({
               />
             </div>
 
-            {/* 4. ADICIONADO O CAMPO DE INPUT PARA O TELEFONE NO FORMULÁRIO */}
+            {/* 4. CAMPO 'telefone' INCLUÍDO NO JSX */}
             <div>
               <Label htmlFor="telefone">Telefone *</Label>
               <Input
@@ -161,7 +363,9 @@ export function AuthPages({
                 type="tel"
                 placeholder="(99) 99999-9999"
                 value={formData.telefone}
-                onChange={(e) => handleInputChange("telefone", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("telefone", e.target.value)
+                }
                 disabled={isLoading}
                 required
               />
@@ -178,8 +382,6 @@ export function AuthPages({
                 required
               />
             </div>
-            
-            {/* ...resto do formulário (Data de Nascimento, E-mail, Senha, etc.)... */}
 
             <div>
               <Label htmlFor="dataNascimento">Data de Nascimento *</Label>
@@ -219,9 +421,7 @@ export function AuthPages({
                 disabled={isLoading}
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Mínimo 6 caracteres
-              </p>
+              <p className="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
             </div>
 
             <div>
@@ -251,7 +451,21 @@ export function AuthPages({
             </Button>
           </form>
 
-          {/* ...botão para navegar para o login... */}
+          {/* Bloco "Já tem uma conta?" (RESTAURADO) */}
+          <div className="mt-6">
+            <Separator className="my-4" />
+            <div className="text-center">
+              <p className="text-sm text-gray-600 mb-4">Já tem uma conta?</p>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => onNavigate("login")}
+                disabled={isLoading}
+              >
+                Fazer Login
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
