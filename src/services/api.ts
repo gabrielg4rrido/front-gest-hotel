@@ -39,6 +39,7 @@ export interface RegisterData {
   senha: string;
   cpf: string;
   endereco: string;
+  telefone: string;
   dataNascimento: string;
   fotoPerfil?: File;
 }
@@ -49,6 +50,7 @@ export interface LoginData {
 }
 
 export interface Cliente {
+  telefone: string;
   id: string;
   nome: string;
   email: string;
@@ -172,6 +174,7 @@ export const apiService = {
       formData.append("cpf", data.cpf);
       formData.append("endereco", data.endereco);
       formData.append("dataNascimento", data.dataNascimento);
+      formData.append("telefone", data.telefone);
       formData.append("fotoPerfil", data.fotoPerfil);
 
       const response = await fetch(`${API_BASE_URL}/clientes`, {
@@ -201,6 +204,7 @@ export const apiService = {
         cpf: data.cpf,
         endereco: data.endereco,
         dataNascimento: data.dataNascimento,
+        telefone: data.telefone,
       }),
     });
 

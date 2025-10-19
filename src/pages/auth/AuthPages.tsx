@@ -128,8 +128,7 @@ export function AuthPages({
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* ...código de erro e foto de perfil... */}
-            
+
             <div>
               <Label htmlFor="nome">Nome *</Label>
               <Input

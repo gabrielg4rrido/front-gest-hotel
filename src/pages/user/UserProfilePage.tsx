@@ -41,6 +41,7 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
     cpf: "",
     dataNascimento: "",
     endereco: "",
+    telefone: "",
   });
 
   // Estado para o modal de alteração de senha
@@ -90,6 +91,8 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
           cpf: clienteData.cpf || "",
           dataNascimento: formatDateForInput(clienteData.dataNascimento),
           endereco: clienteData.endereco || "",
+          telefone: clienteData.telefone || "",
+
         });
       } catch (err: any) {
         console.error("Erro ao carregar dados do usuário:", err);
@@ -115,6 +118,7 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
         cpf: editedData.cpf,
         dataNascimento: editedData.dataNascimento,
         endereco: editedData.endereco,
+        telefone: editedData.telefone.replace(/\D/g, ""),
       });
 
       // Converter data para formato YYYY-MM-DD
@@ -132,6 +136,7 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
         cpf: updatedCliente.cpf || "",
         dataNascimento: formatDateForInput(updatedCliente.dataNascimento),
         endereco: updatedCliente.endereco || "",
+        telefone: updatedCliente.telefone || "",
       });
       setIsEditing(false);
     } catch (err: any) {
@@ -157,6 +162,7 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
         cpf: userData.cpf || "",
         dataNascimento: formatDateForInput(userData.dataNascimento),
         endereco: userData.endereco || "",
+        telefone: userData.telefone || "",
       });
     }
     setIsEditing(false);
@@ -167,6 +173,19 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
   const formatCPF = (cpf: string) => {
     if (!cpf) return "";
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  };
+
+  // Função para formatar Telefone
+  const formatTelefone = (tel: string) => {
+    if (!tel) return "";
+    tel = tel.replace(/\D/g, "");
+    if (tel.length === 11) {
+      return tel.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+    }
+    if (tel.length === 10) {
+      return tel.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+    }
+    return tel;
   };
 
   // Função para formatar data
@@ -470,6 +489,26 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
                           setEditedData({
                             ...editedData,
                             cpf: e.target.value.replace(/\D/g, ""),
+                          })
+                        }
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="telefone">Telefone</Label>
+                      <Input
+                        id="telefone"
+                        type="tel"
+                        placeholder="(99) 99999-9999"
+                        value={
+                          isEditing
+                            ? editedData.telefone
+                            : formatTelefone(userData.telefone)
+                        }
+                        onChange={(e) =>
+                          setEditedData({
+                            ...editedData,
+                            telefone: e.target.value,
                           })
                         }
                         disabled={!isEditing}
