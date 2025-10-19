@@ -185,7 +185,7 @@ export const apiService = {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Erro ao registrar cliente");
+        throw new Error(errorData.erro || "Erro ao registrar cliente");
       }
 
       return response.json();
@@ -210,7 +210,7 @@ export const apiService = {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Erro ao registrar cliente");
+      throw new Error(errorData.erro || "Erro ao registrar cliente");
     }
 
     return response.json();
@@ -228,7 +228,7 @@ export const apiService = {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Erro ao fazer login");
+      throw new Error(errorData.erro || "Erro ao fazer login");
     }
 
     const loginResponse: LoginResponse = await response.json();
@@ -282,7 +282,7 @@ export const apiService = {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Erro ao obter dados do cliente");
+      throw new Error(errorData.erro || "Erro ao obter dados do cliente");
     }
 
     return response.json();
@@ -301,7 +301,7 @@ export const apiService = {
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(
-        errorData.message || "Erro ao atualizar dados do cliente"
+        errorData.erro || "Erro ao atualizar dados do cliente"
       );
     }
 
@@ -357,7 +357,7 @@ export const apiService = {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Erro ao alterar senha");
+      throw new Error(errorData.erro || "Erro ao alterar senha");
     }
 
     return response.json();
@@ -371,7 +371,7 @@ export const apiService = {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Erro ao excluir conta");
+      throw new Error(errorData.erro || "Erro ao excluir conta");
     }
 
     return response.json();
