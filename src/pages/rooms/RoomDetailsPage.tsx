@@ -38,6 +38,7 @@ interface ApiRoom {
   description: string;
   price: number;
   capacity: number;
+  imagem: string;
   // Adicione aqui outros campos que a API pode retornar
 }
 
@@ -64,34 +65,35 @@ export function RoomDetailsPage({
 
   // Hook para buscar os dados da API quando o componente é montado ou o roomId muda
   useEffect(() => {
-    const fetchRoomDetails = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        // Busca apenas os dados da API
-        const response = await fetch(
-          `http://localhost:3002/api/quarto/${roomId}`
-        );
-        if (!response.ok) {
-          throw new Error(
-            "Quarto não encontrado ou falha na comunicação com o servidor."
-          );
-        }
-        const apiRoomData: ApiRoom = await response.json();
-
-        // Usa apenas os dados da API, sem merge com dados mockados
-        setRoom(apiRoomData);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Ocorreu um erro desconhecido."
-        );
-      } finally {
-        setLoading(false);
+  const fetchRoomDetails = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`http://localhost:3002/api/quarto/${roomId}`);
+      if (!response.ok) {
+        throw new Error("Quarto não encontrado ou falha na comunicação com o servidor.");
       }
-    };
 
-    fetchRoomDetails();
-  }, [roomId]);
+      const apiRoomData: ApiRoom = await response.json();
+
+      // Corrige o nome da propriedade e remove quebras de linha
+      const formattedRoom = {
+        ...apiRoomData,
+        image: apiRoomData.imagem?.trim(),
+      };
+
+      setRoom(formattedRoom);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Ocorreu um erro desconhecido."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchRoomDetails();
+}, [roomId]);
 
   // --- RENDERIZAÇÃO CONDICIONAL ---
 
@@ -146,10 +148,10 @@ export function RoomDetailsPage({
         />
 
         {/* Galeria de Imagens - só mostra se houver imagens */}
-        {room.images && room.images.length > 0 && (
+        {room.image && (
           <Card className="overflow-hidden mb-8">
             <CardContent className="p-6">
-              <ImageGallery images={room.images} title={room.name} />
+              <ImageGallery images={[room.imagem]} title={room.name} />
             </CardContent>
           </Card>
         )}

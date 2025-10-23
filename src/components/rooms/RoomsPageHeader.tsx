@@ -20,17 +20,17 @@ export function RoomsPageHeader({
   return (
     // Envolvemos os dois blocos em um único elemento pai
     <div>
-      <div className="w-full max-w-4xl mx-auto text-center mb-8 min-h-[200px] flex items-center justify-center">
+      <div className="w-full max-w-4xl text-center mb-8 min-h-[200px] flex items-center justify-center">
         <div className="w-full px-4">
           <h1 className="text-4xl mb-4">Nossos Quartos</h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-gray-600 max-w-2xl">
             Escolha a acomodação perfeita para sua estadia. Todos os nossos
             quartos oferecem conforto e qualidade excepcionais.
           </p>
         </div>
       </div>
 
-      <div className="w-full max-w-4xl mx-auto mb-12 min-h-[150px]">
+      <div className="w-full max-w-4xl mb-12 min-h-[150px]">
         <SearchForm onSearch={onSearch} />
         {searchData && (
           <div className="mt-4 p-4 bg-blue-50 rounded-lg">

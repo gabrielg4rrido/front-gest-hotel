@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { SearchForm } from "../../components/SearchForm";
 import { Breadcrumb } from "../../components/Breadcrumb";
 import { RoomFilterSidebar } from "../../components/rooms/RoomFilterSideBar";
 import { useRooms } from "../../components/rooms/useRooms"; // Importe o nosso novo hook!
@@ -120,7 +119,7 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
           <div className="flex-1 min-w-0">
             <RoomsPageHeader onSearch={handleSearch} searchData={searchData} />
 
-            <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-8 min-h-[600px] pb-16">
+            <div className="w-full max-w-4xl flex flex-col items-center gap-8 min-h-[600px] pb-16">
               <RoomList
                 rooms={rooms}
                 loading={loading}
