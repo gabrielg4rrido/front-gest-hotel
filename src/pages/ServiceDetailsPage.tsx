@@ -2,12 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Breadcrumb } from "../components/Breadcrumb";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-
-interface ServiceDetailsPageProps {
-  serviceId: number;
-  onNavigate: (page: string) => void;
-}
+import { Star } from "lucide-react";
 
 interface Service {
   id: number;
@@ -17,23 +12,56 @@ interface Service {
   preco: number;
   localidade: string;
   contato: string;
-  imagem: string;
-  caracteristicas: string[];
-  inclusos: string[];
+  imagem: string | null;
+  imagens?: string[];
+  caracteristicas?: string[];
+  inclusos?: string[];
+  avaliacoes?: Review[];
+}
+
+interface Review {
+  autor: string;
+  nota: number;
+  comentario: string;
+  data: string;
+}
+
+interface ServiceDetailsPageProps {
+  serviceId: number;
+  onNavigate: (page: string) => void;
 }
 
 export function ServiceDetailsPage({ serviceId, onNavigate }: ServiceDetailsPageProps) {
   const [service, setService] = useState<Service | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [gallery, setGallery] = useState<string[]>([]);
+  const [fade, setFade] = useState(false);
 
   useEffect(() => {
-    fetch(`http://localhost:3001/api/services/${serviceId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Detalhes do serviço:", data);
+    async function fetchService() {
+      try {
+        const res = await fetch(`http://localhost:3001/api/services/${serviceId}`);
+        const data = await res.json();
+
         setService(data);
-      })
-      .catch((err) => console.error("Erro ao buscar detalhes:", err));
+        setImageUrl(data.imagem || null);
+        setGallery(data.imagens || []);
+      } catch (err) {
+        console.error("Erro ao buscar detalhes do serviço:", err);
+      }
+    }
+
+    fetchService();
   }, [serviceId]);
+
+  const handleImageChange = (newUrl: string) => {
+    if (newUrl === imageUrl) return;
+    setFade(true);
+    setTimeout(() => {
+      setImageUrl(newUrl);
+      setFade(false);
+    }, 250);
+  };
 
   if (!service) {
     return (
@@ -48,91 +76,190 @@ export function ServiceDetailsPage({ serviceId, onNavigate }: ServiceDetailsPage
     { label: service.titulo, href: "#" },
   ];
 
+  const precoFormatado =
+    service.preco && service.preco > 0
+      ? `R$ ${Number(service.preco).toFixed(2)}`
+      : "R$ 80 - R$ 250 por pessoa";
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <Breadcrumb items={breadcrumbItems} />
 
-        {/* Cabeçalho */}
-        <div className="flex flex-col md:flex-row gap-8 mt-6">
-          {/* Imagem principal */}
-          <div className="w-full md:w-1/2">
-            <ImageWithFallback
-              src={service.imagem}
-              alt={service.titulo}
-              className="w-full h-80 object-cover rounded-lg shadow-sm"
-            />
-          </div>
-
-          {/* Informações principais */}
-          <div className="flex-1">
-            <h1 className="text-3xl font-semibold mb-2">{service.titulo}</h1>
-            <p className="text-gray-600 mb-4">{service.descricao}</p>
-            <p className="text-gray-700 mb-2">
-              <strong>Detalhes:</strong> {service.detalhes}
-            </p>
-            <p className="text-gray-700 mb-2">
-              <strong>Localidade:</strong> {service.localidade}
-            </p>
-            <p className="text-gray-700 mb-2">
-              <strong>Contato:</strong> {service.contato}
-            </p>
-            {Number(service.preco) > 0 && (
-              <p className="text-gray-800 text-lg font-semibold mt-3">
-                💰 R$ {(Number(service.preco) || 0).toFixed(2)}
-              </p>
+        {/* Seção principal */}
+        <div className="mt-6 bg-white rounded-xl shadow-sm p-6 grid md:grid-cols-2 gap-8">
+          {/* Coluna da esquerda - imagem e galeria */}
+          <div>
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={service.titulo}
+                className={`w-full h-80 object-cover rounded-xl shadow-md border border-gray-200 transition-opacity duration-300 ${
+                  fade ? "opacity-0" : "opacity-100"
+                }`}
+              />
+            ) : (
+              <div className="w-full h-80 bg-gray-100 flex items-center justify-center rounded-xl text-gray-400 border border-gray-200">
+                Nenhuma imagem disponível
+              </div>
             )}
 
+            {gallery.length > 1 && (
+              <div className="flex gap-3 mt-4 overflow-x-auto">
+                {gallery.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img}
+                    alt={`Miniatura ${idx + 1}`}
+                    className={`w-24 h-20 object-cover rounded-lg cursor-pointer transition-transform hover:scale-105 ${
+                      img === imageUrl ? "ring-2 ring-primary" : ""
+                    }`}
+                    onClick={() => handleImageChange(img)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
 
-            <Button
-              className="mt-6"
-              variant="outline"
-              onClick={() => onNavigate("services")}
-            >
-              Voltar
-            </Button>
+          {/* Coluna da direita - informações completas */}
+          <div className="flex flex-col justify-between">
+            <div>
+              {/* Cabeçalho do serviço */}
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-3xl">🍽️</span>
+                <div>
+                  <h1 className="text-2xl font-semibold">{service.titulo}</h1>
+                  <p className="text-sm text-gray-500">
+                    ⭐ 4.7 <span className="text-gray-400">(324 avaliações)</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Descrição */}
+              <p className="text-gray-600 mb-4">{service.descricao}</p>
+
+              {/* Detalhes do serviço com ícones */}
+              <ul className="space-y-2 text-gray-700">
+                <li>⏰ <strong>Detalhes:</strong> {service.detalhes}</li>
+                <li>📍 <strong>Localidade:</strong> {service.localidade}</li>
+                <li>📞 <strong>Contato:</strong> {service.contato}</li>
+                <li>💰 <strong>Preço:</strong> {precoFormatado}</li>
+              </ul>
+
+              {/* Botões de ação */}
+              <div className="flex gap-4 mt-6">
+                <Button className="bg-primary text-white hover:bg-primary/90 px-6">
+                  Entrar em Contato
+                </Button>
+                <Button variant="outline" className="px-6">
+                  Mais Informações
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <Button
+                className="w-32"
+                variant="outline"
+                onClick={() => onNavigate("services")}
+              >
+                Voltar
+              </Button>
+            </div>
           </div>
         </div>
 
         {/* Características e Inclusos */}
-        <div className="mt-12 grid md:grid-cols-2 gap-8">
-          {/* Características */}
-          <Card className="shadow-sm">
+        <div className="mt-10 grid md:grid-cols-2 gap-8">
+          <Card>
             <CardHeader>
-              <CardTitle>Características</CardTitle>
+              <CardTitle>Características do Serviço</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-wrap gap-2">
               {service.caracteristicas && service.caracteristicas.length > 0 ? (
-                <ul className="list-disc list-inside space-y-2 text-gray-700">
-                  {service.caracteristicas.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
+                service.caracteristicas.map((item, i) => (
+                  <span
+                    key={i}
+                    className="bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm border border-green-200"
+                  >
+                    {item}
+                  </span>
+                ))
               ) : (
-                <p className="text-gray-500">Nenhuma característica cadastrada.</p>
+                <p className="text-gray-500 text-sm">Nenhuma característica cadastrada.</p>
               )}
             </CardContent>
           </Card>
 
-          {/* Itens inclusos */}
-          <Card className="shadow-sm">
+          <Card>
             <CardHeader>
-              <CardTitle>Itens Inclusos</CardTitle>
+              <CardTitle>Serviços Inclusos</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-wrap gap-2">
               {service.inclusos && service.inclusos.length > 0 ? (
-                <ul className="list-disc list-inside space-y-2 text-gray-700">
-                  {service.inclusos.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
+                service.inclusos.map((item, i) => (
+                  <span
+                    key={i}
+                    className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm border border-blue-200"
+                  >
+                    {item}
+                  </span>
+                ))
               ) : (
-                <p className="text-gray-500">Nenhum item incluso cadastrado.</p>
+                <p className="text-gray-500 text-sm">Nenhum item incluso cadastrado.</p>
               )}
             </CardContent>
           </Card>
         </div>
+
+        {/* Avaliações */}
+        {service.avaliacoes && service.avaliacoes.length > 0 && (
+          <div className="mt-12 bg-white rounded-xl shadow-sm p-6">
+            <h3 className="text-2xl font-semibold mb-4">Avaliações dos Clientes</h3>
+
+            <div className="flex items-center mb-6">
+              <Star className="text-yellow-400 fill-yellow-400 mr-2" />
+              <span className="font-bold text-lg">
+                {(
+                  service.avaliacoes.reduce((acc, r) => acc + r.nota, 0) /
+                  service.avaliacoes.length
+                ).toFixed(1)}{" "}
+                de 5
+              </span>
+              <span className="text-gray-500 ml-2">
+                ({service.avaliacoes.length} avaliações)
+              </span>
+            </div>
+
+            <div className="space-y-4">
+              {service.avaliacoes.map((r, idx) => (
+                <div key={idx} className="border-b pb-4">
+                  <div className="flex items-center mb-2">
+                    <div className="bg-gray-200 text-gray-700 font-semibold rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                      {r.autor.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-medium">{r.autor}</p>
+                      <p className="text-xs text-gray-500">{r.data}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center mb-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          i < r.nota ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-gray-700 text-sm">{r.comentario}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

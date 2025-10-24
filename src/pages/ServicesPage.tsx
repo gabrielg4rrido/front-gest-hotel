@@ -117,38 +117,41 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
 
         {/* Lista de Serviços */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service) => (
-            <Card key={service.id} className="overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full">
-              <div className="relative h-48 w-full">
-                <ImageWithFallback
-                  src={
-                    service.imagem && service.imagem.startsWith("data:image")
-                      ? service.imagem
-                      : `data:image/jpeg;base64,${service.imagem || ""}`
-                  }
-                  alt={service.titulo}
-                  className="w-full h-full object-cover"
-                />
+          {services
+            .filter(service => service.imagem && service.imagem.trim() !== "")
+            .map((service) => (
+              <Card key={service.id} className="overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full">
 
-              </div>
+                <div className="relative h-48 w-full">
+                  <ImageWithFallback
+                    src={
+                      service.imagem && service.imagem.startsWith("data:image")
+                        ? service.imagem
+                        : `data:image/jpeg;base64,${service.imagem || ""}`
+                    }
+                    alt={service.titulo}
+                    className="w-full h-full object-cover"
+                  />
 
-              <CardHeader className="pb-3">
-                <CardTitle className="text-xl">{service.titulo}</CardTitle>
-                <CardDescription className="text-sm">{service.descricao}</CardDescription>
-              </CardHeader>
+                </div>
 
-              <CardContent className="flex flex-col flex-grow pt-0">
-                <p className="text-sm text-gray-600 mb-6">{service.detalhes}</p>
-                <Button
-                  variant="outline"
-                  className="w-full mt-auto"
-                  onClick={() => onNavigate("service-details", service.id)}
-                >
-                  Ver Detalhes
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-xl">{service.titulo}</CardTitle>
+                  <CardDescription className="text-sm">{service.descricao}</CardDescription>
+                </CardHeader>
+
+                <CardContent className="flex flex-col flex-grow pt-0">
+                  <p className="text-sm text-gray-600 mb-6">{service.detalhes}</p>
+                  <Button
+                    variant="outline"
+                    className="w-full mt-auto"
+                    onClick={() => onNavigate("service-details", service.id)}
+                  >
+                    Ver Detalhes
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
         </div>
 
         {/* 🔹 Serviços Adicionais */}
