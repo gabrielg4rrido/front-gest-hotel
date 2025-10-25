@@ -10,13 +10,13 @@ import {
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Separator } from "../../components/ui/separator";
-import { Camera, User, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react"; // Removido Camera, User
 import { apiService, RegisterData, LoginData } from "../../services/api";
 
 interface AuthPagesProps {
   currentPage: "login" | "register";
   onNavigate: (page: string) => void;
-  onLogin?: (userData: { name: string; email: string; avatar: string }) => void;
+  onLogin?: (userData: { name: string; email: string; avatar?: string }) => void; // Avatar agora é opcional
 }
 
 export function AuthPages({
@@ -32,37 +32,21 @@ export function AuthPages({
     cpf: "",
     endereco: "",
     dataNascimento: "",
-    // 1. CAMPO 'telefone' INCLUÍDO NO ESTADO
     telefone: "",
     statusCliente: "ativo",
-    fotoPerfil: null as File | null,
+    // Removido fotoPerfil do estado inicial
   });
 
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // Removido previewUrl state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Limpar erro quando o usuário começar a digitar
     if (error) setError(null);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData((prev) => ({ ...prev, fotoPerfil: file }));
-
-    // Criar preview da imagem
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setPreviewUrl(null);
-    }
-  };
+  // Removido handleFileChange
 
   const validateForm = () => {
     if (currentPage === "login") {
@@ -71,7 +55,7 @@ export function AuthPages({
         return false;
       }
     } else {
-      // Validações para registro
+      // Validações para registro (mantém telefone)
       if (
         !formData.nome ||
         !formData.email ||
@@ -79,7 +63,6 @@ export function AuthPages({
         !formData.cpf ||
         !formData.endereco ||
         !formData.dataNascimento ||
-        // 2. CAMPO 'telefone' INCLUÍDO NA VALIDAÇÃO
         !formData.telefone
       ) {
         setError("Por favor, preencha todos os campos obrigatórios");
@@ -96,21 +79,18 @@ export function AuthPages({
         return false;
       }
 
-      // Validação básica de email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
         setError("Por favor, insira um email válido");
         return false;
       }
 
-      // Validação básica de CPF (apenas números)
       const cpfNumbers = formData.cpf.replace(/\D/g, "");
       if (cpfNumbers.length !== 11) {
         setError("CPF deve conter 11 dígitos");
         return false;
       }
     }
-
     return true;
   };
 
@@ -130,58 +110,47 @@ export function AuthPages({
           email: formData.email,
           senha: formData.password,
         };
-
         const response = await apiService.login(loginData);
 
         if (onLogin) {
           onLogin({
             name: response.usuario.nome,
             email: response.usuario.email,
-            avatar:
-              previewUrl ||
-              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
+            avatar: apiService.getCurrentUser()?.fotoPerfil, // Pega avatar do localStorage após login
           });
         }
-
         onNavigate("home");
       } else {
-        // Registrar novo cliente
-        const registerData: RegisterData = {
+        // Registrar novo cliente (sem fotoPerfil)
+        const registerData: Omit<RegisterData, 'fotoPerfil'> = { // Usar Omit para tipagem
           nome: formData.nome,
           email: formData.email,
           senha: formData.password,
           cpf: formData.cpf.replace(/\D/g, ""),
-          // 3. CAMPO 'telefone' INCLUÍDO NO ENVIO
           telefone: formData.telefone.replace(/\D/g, ""),
           endereco: formData.endereco,
           dataNascimento: formData.dataNascimento,
-          ...(formData.fotoPerfil && { fotoPerfil: formData.fotoPerfil }),
+          // fotoPerfil removido daqui
         };
 
-        const registeredCliente = await apiService.registerCliente(
-          registerData
-        );
+        // A função registerCliente no api.ts já trata a ausência da foto
+        const registeredCliente = await apiService.registerCliente(registerData as RegisterData);
 
-        // Após registrar com sucesso, fazer login automaticamente
+        // Login automático após registro
         const loginData: LoginData = {
           email: formData.email,
           senha: formData.password,
         };
-
         await apiService.login(loginData);
 
-        // Atualizar callback onLogin com dados completos do cliente registrado
         if (onLogin) {
+          // No cadastro, não teremos avatar inicialmente
           onLogin({
             name: registeredCliente.nome,
             email: registeredCliente.email,
-            avatar:
-              registeredCliente.fotoPerfil ||
-              previewUrl ||
-              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
+            // avatar: undefined // Pode omitir ou deixar undefined
           });
         }
-
         onNavigate("home");
       }
     } catch (error: any) {
@@ -193,6 +162,7 @@ export function AuthPages({
   };
 
   if (currentPage === "login") {
+    // Formulário de Login (sem alterações)
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <Card className="w-full max-w-md">
@@ -202,7 +172,6 @@ export function AuthPages({
               Acesse sua conta para gerenciar suas reservas
             </CardDescription>
           </CardHeader>
-
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
@@ -210,62 +179,35 @@ export function AuthPages({
                   {error}
                 </div>
               )}
-
               <div>
                 <Label htmlFor="email">E-mail</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  disabled={isLoading}
-                  required
+                  id="email" type="email" placeholder="seu@email.com"
+                  value={formData.email} onChange={(e) => handleInputChange("email", e.target.value)}
+                  disabled={isLoading} required
                 />
               </div>
-
               <div>
                 <Label htmlFor="password">Senha</Label>
                 <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) =>
-                    handleInputChange("password", e.target.value)
-                  }
-                  disabled={isLoading}
-                  required
+                  id="password" type="password" placeholder="••••••••"
+                  value={formData.password} onChange={(e) => handleInputChange("password", e.target.value)}
+                  disabled={isLoading} required
                 />
               </div>
-
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Entrando...
-                  </>
-                ) : (
-                  "Entrar"
-                )}
+                {isLoading ? ( <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Entrando...</> ) : ( "Entrar" )}
               </Button>
             </form>
-
             <div className="mt-6">
               <Separator className="my-4" />
               <div className="text-center">
                 <p className="text-sm text-gray-600 mb-4">Não tem uma conta?</p>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => onNavigate("register")}
-                  disabled={isLoading}
-                >
+                <Button variant="outline" className="w-full" onClick={() => onNavigate("register")} disabled={isLoading}>
                   Criar Conta
                 </Button>
               </div>
             </div>
-
             <div className="mt-4 text-center">
               <Button variant="link" className="text-sm" disabled={isLoading}>
                 Esqueceu sua senha?
@@ -277,7 +219,7 @@ export function AuthPages({
     );
   }
 
-  // ESTE É O FORMULÁRIO DE "CRIAR CONTA" ATUALIZADO
+  // Formulário de Criar Conta (sem a seção da foto)
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
       <Card className="w-full max-w-md">
@@ -296,130 +238,68 @@ export function AuthPages({
               </div>
             )}
 
-            {/* Bloco de Foto de Perfil (RESTAURADO) */}
-            <div className="flex justify-center mb-6">
-              <div className="relative">
-                <input
-                  id="fotoPerfil"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  disabled={isLoading}
-                />
-                <label
-                  htmlFor="fotoPerfil"
-                  className="relative block w-32 h-32 rounded-full overflow-hidden cursor-pointer group border-4 border-gray-200 hover:border-primary transition-colors"
-                >
-                  {previewUrl ? (
-                    <img
-                      src={previewUrl}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                      <User className="w-16 h-16 text-gray-400" />
-                    </div>
-                  )}
-
-                  {/* Overlay com ícone de câmera no hover */}
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Camera className="w-10 h-10 text-white" />
-                  </div>
-                </label>
-              </div>
-            </div>
+            {/* Seção da Foto de Perfil REMOVIDA */}
 
             <div>
               <Label htmlFor="nome">Nome *</Label>
               <Input
-                id="nome"
-                placeholder="João Silva"
-                value={formData.nome}
+                id="nome" placeholder="João Silva" value={formData.nome}
                 onChange={(e) => handleInputChange("nome", e.target.value)}
-                disabled={isLoading}
-                required
+                disabled={isLoading} required
               />
             </div>
 
             <div>
               <Label htmlFor="cpf">CPF *</Label>
               <Input
-                id="cpf"
-                placeholder="000.000.000-00"
-                value={formData.cpf}
+                id="cpf" placeholder="000.000.000-00" value={formData.cpf}
                 onChange={(e) => handleInputChange("cpf", e.target.value)}
-                disabled={isLoading}
-                required
+                disabled={isLoading} required
               />
             </div>
 
-            {/* 4. CAMPO 'telefone' INCLUÍDO NO JSX */}
             <div>
               <Label htmlFor="telefone">Telefone *</Label>
               <Input
-                id="telefone"
-                type="tel"
-                placeholder="(99) 99999-9999"
-                value={formData.telefone}
-                onChange={(e) =>
-                  handleInputChange("telefone", e.target.value)
-                }
-                disabled={isLoading}
-                required
+                id="telefone" type="tel" placeholder="(99) 99999-9999" value={formData.telefone}
+                onChange={(e) => handleInputChange("telefone", e.target.value)}
+                disabled={isLoading} required
               />
             </div>
 
             <div>
               <Label htmlFor="endereco">Endereço *</Label>
               <Input
-                id="endereco"
-                placeholder="Rua Exemplo, 123"
-                value={formData.endereco}
+                id="endereco" placeholder="Rua Exemplo, 123" value={formData.endereco}
                 onChange={(e) => handleInputChange("endereco", e.target.value)}
-                disabled={isLoading}
-                required
+                disabled={isLoading} required
               />
             </div>
 
             <div>
               <Label htmlFor="dataNascimento">Data de Nascimento *</Label>
               <Input
-                id="dataNascimento"
-                type="date"
-                value={formData.dataNascimento}
-                onChange={(e) =>
-                  handleInputChange("dataNascimento", e.target.value)
-                }
-                disabled={isLoading}
-                required
+                id="dataNascimento" type="date" value={formData.dataNascimento}
+                onChange={(e) => handleInputChange("dataNascimento", e.target.value)}
+                disabled={isLoading} required
               />
             </div>
 
             <div>
               <Label htmlFor="email">E-mail *</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={formData.email}
+                id="email" type="email" placeholder="seu@email.com" value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                disabled={isLoading}
-                required
+                disabled={isLoading} required
               />
             </div>
 
             <div>
               <Label htmlFor="password">Senha *</Label>
               <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
+                id="password" type="password" placeholder="••••••••" value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
-                disabled={isLoading}
-                required
+                disabled={isLoading} required
               />
               <p className="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
             </div>
@@ -427,41 +307,23 @@ export function AuthPages({
             <div>
               <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
               <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={(e) =>
-                  handleInputChange("confirmPassword", e.target.value)
-                }
-                disabled={isLoading}
-                required
+                id="confirmPassword" type="password" placeholder="••••••••" value={formData.confirmPassword}
+                onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                disabled={isLoading} required
               />
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Criando conta...
-                </>
-              ) : (
-                "Criar Conta"
-              )}
+              {isLoading ? ( <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Criando conta...</> ) : ( "Criar Conta" )}
             </Button>
           </form>
 
-          {/* Bloco "Já tem uma conta?" (RESTAURADO) */}
+          {/* Bloco "Já tem uma conta?" (Mantido) */}
           <div className="mt-6">
             <Separator className="my-4" />
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-4">Já tem uma conta?</p>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => onNavigate("login")}
-                disabled={isLoading}
-              >
+              <Button variant="outline" className="w-full" onClick={() => onNavigate("login")} disabled={isLoading}>
                 Fazer Login
               </Button>
             </div>
