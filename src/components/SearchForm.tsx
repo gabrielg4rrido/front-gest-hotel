@@ -64,7 +64,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
     <Card className="w-full max-w-4xl mx-auto bg-white shadow-lg">
       <CardContent className="p-6">
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Check-in */}
             <div className="space-y-2">
               <Label htmlFor="checkin" className="flex items-center gap-2">
@@ -100,7 +100,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
             </div>
 
             {/* Guests */}
-            <div className="space-y-2">
+            <div className="space-y-2 flex flex-col">
               <Label htmlFor="guests" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 Hóspedes
@@ -123,10 +123,13 @@ export function SearchForm({ onSearch }: SearchFormProps) {
             </div>
 
             {/* Search Button */}
-            <Button type="submit" size="lg" className="w-full">
-              <Search className="h-4 w-4 mr-2" />
-              Buscar Quartos
-            </Button>
+            <div className="space-y-2 flex flex-col">
+              <Button type="submit" className="w-full mt-auto h-9 mb-2">
+                <Search className="h-4 w-4" />
+                Buscar Quartos
+              </Button>
+            </div>
+            
           </div>
         </form>
       </CardContent>
