@@ -1,80 +1,105 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { Breadcrumb } from '../components/Breadcrumb';
-import { Star, Clock, MapPin, Car, Phone } from 'lucide-react';
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
+import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { Breadcrumb } from "../../components/Breadcrumb";
+import { Star, Clock, MapPin, Car, Phone } from "lucide-react";
 
 interface AttractionDetailsPageProps {
   attractionId: number;
   onNavigate: (page: string) => void;
 }
 
-export function AttractionDetailsPage({ attractionId, onNavigate }: AttractionDetailsPageProps) {
+export function AttractionDetailsPage({
+  attractionId,
+  onNavigate,
+}: AttractionDetailsPageProps) {
   const attractions = [
     {
       id: 1,
-      name: 'Praia Paradisíaca',
-      description: 'Águas cristalinas e areia branca a apenas 5 minutos do hotel',
-      distance: '500m',
-      category: 'Praia',
-      rating: '4.9',
-      image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800',
-      longDescription: 'Uma das praias mais belas da região, conhecida por suas águas cristalinas de cor azul turquesa e areia fininha e branca. O local oferece uma estrutura completa com guarda-sóis, cadeiras e bar na praia. É perfeita para relaxar, nadar e praticar esportes aquáticos.',
-      openingHours: '24 horas',
-      bestTime: 'Manhã (6h-10h) e final da tarde (16h-18h)',
-      activities: ['Natação', 'Mergulho', 'Stand-up Paddle', 'Vôlei de Praia'],
-      facilities: ['Chuveiros', 'Banheiros', 'Bar', 'Aluguel de equipamentos'],
-      howToGet: 'A pé pela trilha do hotel (5 min) ou de carro pela estrada principal (3 min)',
+      name: "Praia Paradisíaca",
+      description:
+        "Águas cristalinas e areia branca a apenas 5 minutos do hotel",
+      distance: "500m",
+      category: "Praia",
+      rating: "4.9",
+      image:
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+      longDescription:
+        "Uma das praias mais belas da região, conhecida por suas águas cristalinas de cor azul turquesa e areia fininha e branca. O local oferece uma estrutura completa com guarda-sóis, cadeiras e bar na praia. É perfeita para relaxar, nadar e praticar esportes aquáticos.",
+      openingHours: "24 horas",
+      bestTime: "Manhã (6h-10h) e final da tarde (16h-18h)",
+      activities: ["Natação", "Mergulho", "Stand-up Paddle", "Vôlei de Praia"],
+      facilities: ["Chuveiros", "Banheiros", "Bar", "Aluguel de equipamentos"],
+      howToGet:
+        "A pé pela trilha do hotel (5 min) ou de carro pela estrada principal (3 min)",
       tips: [
-        'Leve protetor solar e chapéu',
-        'Use óculos de sol',
-        'Hidrate-se constantemente',
-        'Respeite a vida marinha'
-      ]
+        "Leve protetor solar e chapéu",
+        "Use óculos de sol",
+        "Hidrate-se constantemente",
+        "Respeite a vida marinha",
+      ],
     },
     {
       id: 2,
-      name: 'Centro Histórico',
-      description: 'Arquitetura colonial preservada e museus interessantes',
-      distance: '2km',
-      category: 'Cultura',
-      rating: '4.7',
-      image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800',
-      longDescription: 'O centro histórico da cidade preserva a arquitetura colonial dos séculos XVIII e XIX. Com ruas de pedra, casarios coloridos e igrejas históricas, é um verdadeiro museu a céu aberto. Abriga diversos museus, galerias de arte e lojas de artesanato local.',
-      openingHours: '8h às 18h (segunda a domingo)',
-      bestTime: 'Manhã (9h-12h) para evitar o calor',
-      activities: ['Tour guiado', 'Visita a museus', 'Compras de artesanato', 'Fotografia'],
-      facilities: ['Guias turísticos', 'Lojas', 'Restaurantes', 'Banheiros públicos'],
-      howToGet: 'Transfer do hotel (15 min) ou ônibus local linha 101',
+      name: "Centro Histórico",
+      description: "Arquitetura colonial preservada e museus interessantes",
+      distance: "2km",
+      category: "Cultura",
+      rating: "4.7",
+      image:
+        "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800",
+      longDescription:
+        "O centro histórico da cidade preserva a arquitetura colonial dos séculos XVIII e XIX. Com ruas de pedra, casarios coloridos e igrejas históricas, é um verdadeiro museu a céu aberto. Abriga diversos museus, galerias de arte e lojas de artesanato local.",
+      openingHours: "8h às 18h (segunda a domingo)",
+      bestTime: "Manhã (9h-12h) para evitar o calor",
+      activities: [
+        "Tour guiado",
+        "Visita a museus",
+        "Compras de artesanato",
+        "Fotografia",
+      ],
+      facilities: [
+        "Guias turísticos",
+        "Lojas",
+        "Restaurantes",
+        "Banheiros públicos",
+      ],
+      howToGet: "Transfer do hotel (15 min) ou ônibus local linha 101",
       tips: [
-        'Use calçados confortáveis',
-        'Leve máquina fotográfica',
-        'Contrate um guia local',
-        'Experimente a culinária regional'
-      ]
-    }
-    // Adicione outras atrações conforme necessário
+        "Use calçados confortáveis",
+        "Leve máquina fotográfica",
+        "Contrate um guia local",
+        "Experimente a culinária regional",
+      ],
+    },
   ];
 
-  const attraction = attractions.find(a => a.id === attractionId) || attractions[0];
+  const attraction =
+    attractions.find((a) => a.id === attractionId) || attractions[0];
 
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
-      'Praia': 'bg-blue-100 text-blue-800',
-      'Cultura': 'bg-purple-100 text-purple-800',
-      'Aventura': 'bg-green-100 text-green-800',
-      'Gastronomia': 'bg-orange-100 text-orange-800',
-      'Marítimo': 'bg-cyan-100 text-cyan-800',
-      'Natureza': 'bg-emerald-100 text-emerald-800'
+      Praia: "bg-blue-100 text-blue-800",
+      Cultura: "bg-purple-100 text-purple-800",
+      Aventura: "bg-green-100 text-green-800",
+      Gastronomia: "bg-orange-100 text-orange-800",
+      Marítimo: "bg-cyan-100 text-cyan-800",
+      Natureza: "bg-emerald-100 text-emerald-800",
     };
-    return colors[category] || 'bg-gray-100 text-gray-800';
+    return colors[category] || "bg-gray-100 text-gray-800";
   };
 
   const breadcrumbItems = [
-    { label: 'Atrações', onClick: () => onNavigate('attractions') },
-    { label: attraction.name }
+    { label: "Atrações", onClick: () => onNavigate("attractions") },
+    { label: attraction.name },
   ];
 
   return (
@@ -96,17 +121,14 @@ export function AttractionDetailsPage({ attractionId, onNavigate }: AttractionDe
                 {attraction.category}
               </Badge>
             </div>
-            <div className="absolute top-6 right-6">
-              <Badge className="bg-white text-gray-800">
-                ⭐ {attraction.rating}
-              </Badge>
-            </div>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div>
               <h1 className="text-4xl mb-2">{attraction.name}</h1>
-              <p className="text-gray-600 text-lg mb-4">{attraction.description}</p>
+              <p className="text-gray-600 text-lg mb-4">
+                {attraction.description}
+              </p>
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
                   <MapPin className="w-4 h-4" />
@@ -154,7 +176,10 @@ export function AttractionDetailsPage({ attractionId, onNavigate }: AttractionDe
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-3">
                   {attraction.activities.map((activity, index) => (
-                    <div key={index} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg"
+                    >
                       <div className="w-2 h-2 bg-primary rounded-full"></div>
                       <span>{activity}</span>
                     </div>
@@ -171,7 +196,10 @@ export function AttractionDetailsPage({ attractionId, onNavigate }: AttractionDe
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-3">
                   {attraction.facilities.map((facility, index) => (
-                    <div key={index} className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 p-3 bg-green-50 rounded-lg"
+                    >
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span>{facility}</span>
                     </div>
@@ -230,11 +258,10 @@ export function AttractionDetailsPage({ attractionId, onNavigate }: AttractionDe
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-600 mb-4">
-                  Nossa equipe de concierge pode organizar sua visita e providenciar transporte.
+                  Nossa equipe de concierge pode organizar sua visita e
+                  providenciar transporte.
                 </p>
-                <Button className="w-full">
-                  Falar com Concierge
-                </Button>
+                <Button className="w-full">Falar com Concierge</Button>
               </CardContent>
             </Card>
           </div>

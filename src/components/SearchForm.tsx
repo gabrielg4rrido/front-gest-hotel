@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Card, CardContent } from './ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Calendar, Users, Search } from 'lucide-react';
+import React, { useState } from "react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Card, CardContent } from "./ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { Calendar, Users, Search } from "lucide-react";
 
 interface SearchFormProps {
   onSearch: (searchData: {
@@ -15,15 +21,15 @@ interface SearchFormProps {
 }
 
 export function SearchForm({ onSearch }: SearchFormProps) {
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!checkIn || !checkOut) {
-      alert('Por favor, selecione as datas de check-in e check-out');
+      alert("Por favor, selecione as datas de check-in e check-out");
       return;
     }
 
@@ -33,25 +39,25 @@ export function SearchForm({ onSearch }: SearchFormProps) {
     today.setHours(0, 0, 0, 0);
 
     if (checkInDate < today) {
-      alert('A data de check-in não pode ser anterior a hoje');
+      alert("A data de check-in não pode ser anterior a hoje");
       return;
     }
 
     if (checkOutDate <= checkInDate) {
-      alert('A data de check-out deve ser posterior à data de check-in');
+      alert("A data de check-out deve ser posterior à data de check-in");
       return;
     }
 
     onSearch({ checkIn, checkOut, guests });
   };
 
-  // Set minimum date to today
   const today = new Date();
-  const minDate = today.toISOString().split('T')[0];
+  const minDate = today.toISOString().split("T")[0];
 
-  // Set minimum checkout date to day after checkin
-  const minCheckOut = checkIn ? 
-    new Date(new Date(checkIn).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0] 
+  const minCheckOut = checkIn
+    ? new Date(new Date(checkIn).getTime() + 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0]
     : minDate;
 
   return (
@@ -99,14 +105,17 @@ export function SearchForm({ onSearch }: SearchFormProps) {
                 <Users className="h-4 w-4" />
                 Hóspedes
               </Label>
-              <Select value={guests.toString()} onValueChange={(value) => setGuests(parseInt(value))}>
+              <Select
+                value={guests.toString()}
+                onValueChange={(value) => setGuests(parseInt(value))}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
                     <SelectItem key={num} value={num.toString()}>
-                      {num} {num === 1 ? 'Hóspede' : 'Hóspedes'}
+                      {num} {num === 1 ? "Hóspede" : "Hóspedes"}
                     </SelectItem>
                   ))}
                 </SelectContent>

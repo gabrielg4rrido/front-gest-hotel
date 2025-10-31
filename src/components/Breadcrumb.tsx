@@ -1,18 +1,18 @@
-import React from 'react';
-import { Button } from './ui/button';
-import { ChevronRight, Home } from 'lucide-react';
+import React from "react";
+import { Button } from "./ui/button";
+import { ChevronRight, Home } from "lucide-react";
 
 interface BreadcrumbItem {
   label: string;
   page?: string;
-  roomId?: number;
+  roomId?: string;
   href?: string;
   onClick?: () => void;
 }
 
 interface BreadcrumbProps {
   items: BreadcrumbItem[];
-  onNavigate?: (page: string, roomId?: number) => void;
+  onNavigate?: (page: string, roomId?: string) => void;
 }
 
 export function Breadcrumb({ items, onNavigate }: BreadcrumbProps) {
@@ -21,13 +21,13 @@ export function Breadcrumb({ items, onNavigate }: BreadcrumbProps) {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => onNavigate?.('home')}
+        onClick={() => onNavigate?.("home")}
         className="flex items-center gap-1 px-2 py-1 h-auto text-gray-600 hover:text-primary"
       >
         <Home className="w-4 h-4" />
         Home
       </Button>
-      
+
       {items.map((item, index) => (
         <React.Fragment key={index}>
           <ChevronRight className="w-4 h-4 text-gray-400" />

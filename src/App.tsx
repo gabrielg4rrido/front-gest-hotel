@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { Header, Footer } from "./components";
 import {
   HomePage,
@@ -10,15 +11,16 @@ import {
   PaymentPage,
   UserProfilePage,
   MyReservationsPage,
-  PersonalInfoPage,
   MyTravelsPage,
 } from "./pages";
+import { apiService, TokenManager } from "./services/api";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState("home");
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
-  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
-
+  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
+    null
+  );
   const [paymentData, setPaymentData] = useState<{
     type: "room" | "service";
     name: string;
@@ -36,16 +38,30 @@ export default function App() {
     name: string;
     email: string;
     avatar: string;
-  } | null>({
-    name: "João Silva",
-    email: "joao.silva@email.com",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
-  });
+  } | null>(null);
 
-  // Navegação entre páginas e registro de IDs selecionados
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Verificar autenticação ao inicializar a aplicação
+  useEffect(() => {
+    const checkAuth = () => {
+      const userData = TokenManager.getUserData();
+      if (userData && apiService.isAuthenticated()) {
+        setUser({
+          name: userData.nome,
+          email: userData.email,
+          avatar:
+            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
+        });
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, []);
+
   const handleNavigate = (page: string, itemId?: number) => {
     setCurrentPage(page);
-
     if (page === "room-details" && itemId) {
       setSelectedRoomId(itemId);
     } else if (page === "service-details" && itemId) {
@@ -53,17 +69,13 @@ export default function App() {
     }
   };
 
-  // Abertura de tela de pagamento (para quartos ou serviços)
-  const handleOpenPayment = (
-    type: "room" | "service",
-    data: {
-      name: string;
-      price: number;
-      dates?: { checkIn: string; checkOut: string };
-      guests?: number;
-      duration?: number;
+  const handleOpenPayment = (type: "room" | "service", data: any) => {
+    // Verificar se o usuário está logado antes de abrir o pagamento
+    if (!user) {
+      setCurrentPage("login");
+      return;
     }
-  ) => {
+
     setPaymentData({
       type,
       name: data.name || "",
@@ -75,26 +87,59 @@ export default function App() {
     setCurrentPage("payment");
   };
 
-  // Login e Logout
-  const handleLogout = () => {
-    setUser(null);
-    setCurrentPage("home");
+  const handleLogout = async () => {
+    try {
+      await apiService.logout();
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+    } finally {
+      setUser(null);
+      setCurrentPage("home");
+    }
   };
 
-  const handleLogin = (userData: { name: string; email: string; avatar: string }) => {
+  const handleLogin = (userData: {
+    name: string;
+    email: string;
+    avatar: string;
+  }) => {
     setUser(userData);
     setCurrentPage("home");
   };
 
-  // Renderização dinâmica das páginas
+  // Verificar se páginas protegidas precisam de autenticação
+  const protectedPages = [
+    "profile",
+    "personal-info",
+    "my-reservations",
+    "my-travels",
+    "payment",
+  ];
+
+  useEffect(() => {
+    if (protectedPages.includes(currentPage) && !user) {
+      setCurrentPage("login");
+    }
+  }, [currentPage, user]);
+
+  // Mostrar loading enquanto verifica autenticação
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="mt-4 text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
   const renderCurrentPage = () => {
     switch (currentPage) {
       case "home":
         return <HomePage onNavigate={handleNavigate} />;
-
       case "rooms":
         return <RoomsPage onNavigate={handleNavigate} />;
-
       case "room-details":
         return selectedRoomId ? (
           <RoomDetailsPage
@@ -105,32 +150,31 @@ export default function App() {
         ) : (
           <RoomsPage onNavigate={handleNavigate} />
         );
-
       case "services":
         return <ServicesPage onNavigate={handleNavigate} />;
-
       case "service-details":
         return selectedServiceId ? (
-          <ServiceDetailsPage serviceId={selectedServiceId} onNavigate={handleNavigate} />
+          <ServiceDetailsPage
+            serviceId={selectedServiceId}
+            onNavigate={handleNavigate}
+          />
         ) : (
           <ServicesPage onNavigate={handleNavigate} />
         );
-
       case "profile":
-        return <UserProfilePage onNavigate={handleNavigate} />;
-
       case "personal-info":
-        return <PersonalInfoPage onNavigate={handleNavigate} />;
-
+        return <UserProfilePage onNavigate={handleNavigate} />;
       case "my-reservations":
         return <MyReservationsPage onNavigate={handleNavigate} />;
-
       case "my-travels":
         return <MyTravelsPage onNavigate={handleNavigate} />;
-
       case "payment":
-        return <PaymentPage onNavigate={handleNavigate} bookingData={paymentData || undefined} />;
-
+        return (
+          <PaymentPage
+            onNavigate={handleNavigate}
+            bookingData={paymentData || undefined}
+          />
+        );
       case "login":
       case "register":
         return (
@@ -140,7 +184,6 @@ export default function App() {
             onLogin={handleLogin}
           />
         );
-
       default:
         return <HomePage onNavigate={handleNavigate} />;
     }
@@ -148,7 +191,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header global */}
       <Header
         currentPage={currentPage}
         onNavigate={handleNavigate}
@@ -156,10 +198,8 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      {/* Conteúdo dinâmico */}
       <main className="flex-1">{renderCurrentPage()}</main>
 
-      {/* Rodapé fixo */}
       <Footer />
     </div>
   );
