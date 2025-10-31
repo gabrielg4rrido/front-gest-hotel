@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { Button } from "../../components/ui/button";
+import React, { useState, useEffect } from "react";
+import { Button } from "../components/ui/button";
 import {
   BookingSummary,
   GuestDataForm,
   AdditionalServices,
   PaymentForm,
-} from "../../components/payment";
+} from "../components/payment";
 
 interface PaymentPageProps {
   onNavigate: (page: string) => void;
@@ -32,7 +32,6 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     cvv: "",
   });
 
-  // Estados para dados do hóspede
   const [guestData, setGuestData] = useState({
     totalGuests: bookingData?.guests || 2,
     firstName: "",
@@ -42,53 +41,42 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     isMainGuest: "main",
   });
 
-  // Estados para serviços adicionais
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [additionalServices, setAdditionalServices] = useState<any[]>([]);
 
-  const additionalServices = [
-    {
-      id: "restaurant",
-      name: "Restaurante Gourmet",
-      description: "Acesso ao restaurante com desconto de 15%",
-      price: 0,
-      icon: "🍽️",
-    },
-    {
-      id: "spa",
-      name: "Spa & Wellness",
-      description: "Pacote completo com massagem relaxante",
-      price: 250,
-      icon: "💆",
-    },
-    {
-      id: "gym",
-      name: "Academia Premium",
-      description: "Acesso ilimitado + personal trainer",
-      price: 100,
-      icon: "💪",
-    },
-    {
-      id: "concierge",
-      name: "Concierge 24h",
-      description: "Atendimento personalizado durante a estadia",
-      price: 150,
-      icon: "🎩",
-    },
-    {
-      id: "transfer",
-      name: "Transfer Aeroporto",
-      description: "Transfer ida e volta do aeroporto",
-      price: 120,
-      icon: "✈️",
-    },
-    {
-      id: "laundry",
-      name: "Lavanderia Express",
-      description: "Serviço de lavanderia premium",
-      price: 80,
-      icon: "👔",
-    },
-  ];
+  // 🔹 Mapeamento de ícones armazenados no banco (campo "icone")
+  const emojiMap: Record<string, string> = {
+    transfer: "✈️",
+    lavanderia: "👔",
+    ":baby:": "👶",
+    ":dog:": "🐕",
+    ":bell:": "🛎️",
+    ":car:": "🚗",
+    ":map:": "🗺️",
+    ":wifi:": "📶",
+  };
+
+  // 🔹 Busca serviços adicionais direto do back-end
+  useEffect(() => {
+    fetch("http://localhost:3001/api/additional-services")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Serviços adicionais recebidos:", data);
+        const formatted = data.map((item: any) => ({
+          id: String(item.id),
+          name: item.titulo,
+          description: item.descricao,
+          price: Number(item.preco) || 0,
+          icon: emojiMap[item.icone] || "⭐", // usa ícone do banco ou fallback
+          included: item.incluso === 1, // para marcar como incluso
+        }));
+
+        setAdditionalServices(formatted);
+      })
+      .catch((err) =>
+        console.error("Erro ao buscar serviços adicionais:", err)
+      );
+  }, []);
 
   const handleServiceToggle = (serviceId: string) => {
     setSelectedServices((prev) =>
@@ -98,13 +86,11 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     );
   };
 
+  // ⬇️ RESTANTE DO CÓDIGO PERMANECE IGUAL
   const getBookingData = () => {
     if (bookingData) return bookingData;
-
     const sessionData = sessionStorage.getItem("paymentData");
-    if (sessionData) {
-      return JSON.parse(sessionData);
-    }
+    if (sessionData) return JSON.parse(sessionData);
 
     return {
       type: "room" as const,
@@ -138,7 +124,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     return acc + (service?.price || 0);
   }, 0);
   const subtotal = roomSubtotal + servicesSubtotal;
-  const taxes = subtotal * 0.12; // 12% de impostos
+  const taxes = subtotal * 0.12;
   const total = subtotal + taxes;
 
   const installmentOptions = [
@@ -150,7 +136,6 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
   ];
 
   const handlePayment = () => {
-    // Validar dados do hóspede
     if (
       !guestData.firstName ||
       !guestData.lastName ||
@@ -160,10 +145,8 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
       alert("Por favor, preencha todos os dados do hóspede.");
       return;
     }
-
-    // Simular processamento do pagamento
     alert(
-      `Pagamento processado com sucesso para ${guestData.firstName} ${guestData.lastName}! Você receberá a confirmação por email.`
+      `Pagamento processado com sucesso para ${guestData.firstName} ${guestData.lastName}!`
     );
     onNavigate("home");
   };
@@ -186,7 +169,6 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Resumo da Reserva */}
           <div className="lg:col-span-1">
             <BookingSummary
               booking={booking}
@@ -200,20 +182,18 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            {/* Dados do Hóspede */}
             <GuestDataForm
               guestData={guestData}
               onGuestDataChange={setGuestData}
             />
 
-            {/* Serviços Adicionais */}
+            {/* 🔹 Agora os serviços vêm do backend */}
             <AdditionalServices
               additionalServices={additionalServices}
               selectedServices={selectedServices}
               onServiceToggle={handleServiceToggle}
             />
 
-            {/* Dados do Pagamento */}
             <PaymentForm
               paymentMethod={paymentMethod}
               installments={installments}

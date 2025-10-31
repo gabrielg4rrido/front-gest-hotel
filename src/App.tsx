@@ -33,7 +33,7 @@ export default function App() {
     duration?: number;
   } | null>(null);
 
-  // Estado de autenticação
+  // Estado de autenticação (mock)
   const [user, setUser] = useState<{
     name: string;
     email: string;

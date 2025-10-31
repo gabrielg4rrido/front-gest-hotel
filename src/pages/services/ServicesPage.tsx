@@ -1,77 +1,118 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
-import { Breadcrumb } from "../../components/Breadcrumb";
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { Breadcrumb } from "../components/Breadcrumb";
+
+interface Service {
+  id: number;
+  titulo: string;
+  descricao: string;
+  detalhes: string;
+  preco: number;
+  localidade: string;
+  contato: string;
+  imagem: string;
+}
+
+interface AdditionalService {
+  id: number;
+  titulo: string;
+  descricao: string;
+  preco: number;
+  incluso: number;
+  icone: string | null;
+}
 
 interface ServicesPageProps {
   onNavigate: (page: string, serviceId?: number) => void;
 }
 
 export function ServicesPage({ onNavigate }: ServicesPageProps) {
-  const services = [
-    {
-      id: 1,
-      title: "Restaurante Gourmet",
-      description:
-        "Experimente nossa culinária internacional com chefs renomados",
-      details: "Aberto das 6h às 23h",
-      icon: "🍽️",
-      image:
-        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400",
-    },
-    {
-      id: 2,
-      title: "Spa & Wellness",
-      description: "Relaxe e rejuvenesça em nosso spa completo",
-      details: "Massagens, tratamentos faciais e corporais",
-      icon: "💆",
-      image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400",
-    },
-    {
-      id: 3,
-      title: "Piscina Infinity",
-      description: "Piscina com vista panorâmica para o oceano",
-      details: "Aberta 24h com bar aquático",
-      icon: "🏊",
-      image:
-        "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400",
-    },
-    {
-      id: 4,
-      title: "Academia Premium",
-      description: "Equipamentos modernos e personal trainers",
-      details: "Aberta 24h para hóspedes",
-      icon: "💪",
-      image:
-        "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400",
-    },
-    {
-      id: 5,
-      title: "Business Center",
-      description: "Salas de reunião e serviços executivos",
-      details: "Wi-Fi, impressora, scanner disponíveis",
-      icon: "💼",
-      image:
-        "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400",
-    },
-    {
-      id: 6,
-      title: "Concierge 24h",
-      description: "Atendimento personalizado a qualquer hora",
-      details: "Reservas, ingressos, transfer e mais",
-      icon: "🎩",
-      image: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400",
-    },
-  ];
+  const [services, setServices] = useState<Service[]>([]);
+  const [additionalServices, setAdditionalServices] = useState<
+    AdditionalService[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 🔹 Mapeamento fixo de ícones (usado como fallback)
+  const iconMap: Record<string, string> = {
+    "Restaurante Gourmet": "🍽️",
+    "Spa & Wellness": "💆",
+    "Academia Premium": "💪",
+    "Concierge 24h": "🎩",
+    "Transfer Aeroporto": "✈️",
+    "Lavanderia Express": "👔",
+    "Baby Sitting": "👶",
+    "Pet Friendly": "🐕",
+    "Room Service 24h": "🛎️",
+    "Aluguel de Carros": "🚗",
+    "Tour Guiado": "🗺️",
+    "Wi-Fi Premium": "📶",
+  };
+
+  // 🔹 Tradução de códigos de ícone do banco (":baby:", ":dog:", etc.)
+  const emojiMap: Record<string, string> = {
+    ":baby:": "👶",
+    ":dog:": "🐕",
+    ":bell:": "🛎️",
+    ":car:": "🚗",
+    ":map:": "🗺️",
+    ":wifi:": "📶",
+  };
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [servicesRes, additionalRes] = await Promise.all([
+          fetch("http://localhost:3001/api/services"),
+          fetch("http://localhost:3001/api/additional-services"),
+        ]);
+
+        if (!servicesRes.ok || !additionalRes.ok) {
+          throw new Error("Falha ao buscar dados do backend");
+        }
+
+        const [servicesData, additionalData] = await Promise.all([
+          servicesRes.json(),
+          additionalRes.json(),
+        ]);
+
+        setServices(servicesData);
+        setAdditionalServices(additionalData);
+      } catch (err) {
+        console.error("Erro ao carregar serviços:", err);
+        setError(
+          "⚠️ O servidor não está disponível. Inicie o backend para visualizar os serviços."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   const breadcrumbItems = [{ label: "Serviços", href: "#" }];
+
+  if (loading) {
+    return (
+      <div className="text-center mt-10 text-gray-500">
+        Carregando serviços...
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-center mt-10 text-red-500">{error}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -79,7 +120,7 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
         {/* Breadcrumb */}
         <Breadcrumb items={breadcrumbItems} />
 
-        {/* Header */}
+        {/* Cabeçalho */}
         <div className="text-center mb-12">
           <h1 className="text-4xl mb-4">Nossos Serviços</h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -88,37 +129,37 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
           </p>
         </div>
 
-        {/* Services Grid */}
+        {/* Lista de Serviços */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, index) => (
-            <Card
-              key={index}
-              className="overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full"
-            >
-              <div className="relative h-48 w-full">
-                <ImageWithFallback
-                  src={service.image}
-                  alt={service.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-4 left-4">
-                  <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center text-2xl shadow-sm">
-                    {service.icon}
-                  </div>
+          {services
+            .filter((service) => service.imagem && service.imagem.trim() !== "")
+            .map((service) => (
+              <Card
+                key={service.id}
+                className="overflow-hidden hover:shadow-xl transition-shadow flex flex-col h-full"
+              >
+                <div className="relative h-48 w-full">
+                  <ImageWithFallback
+                    src={
+                      service.imagem && service.imagem.startsWith("data:image")
+                        ? service.imagem
+                        : `data:image/jpeg;base64,${service.imagem || ""}`
+                    }
+                    alt={service.titulo}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              </div>
 
-              <div className="flex flex-col flex-grow">
-                <CardHeader className="flex-shrink-0 pb-3">
-                  <CardTitle className="text-xl">{service.title}</CardTitle>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-xl">{service.titulo}</CardTitle>
                   <CardDescription className="text-sm">
-                    {service.description}
+                    {service.descricao}
                   </CardDescription>
                 </CardHeader>
 
                 <CardContent className="flex flex-col flex-grow pt-0">
-                  <p className="text-sm text-gray-600 mb-6 flex-grow min-h-[2.5rem]">
-                    {service.details}
+                  <p className="text-sm text-gray-600 mb-6">
+                    {service.detalhes}
                   </p>
                   <Button
                     variant="outline"
@@ -128,37 +169,31 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
                     Ver Detalhes
                   </Button>
                 </CardContent>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            ))}
         </div>
 
-        {/* Additional Services */}
+        {/* 🔹 Serviços Adicionais */}
         <div className="mt-16 bg-white rounded-lg p-8 shadow-sm">
           <h3 className="text-2xl mb-6 text-center">Serviços Adicionais</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { name: "Transfer Aeroporto", icon: "✈️" },
-              { name: "Lavanderia Express", icon: "👔" },
-              { name: "Baby Sitting", icon: "👶" },
-              { name: "Pet Friendly", icon: "🐕" },
-              { name: "Room Service 24h", icon: "🛎️" },
-              { name: "Aluguel de Carros", icon: "🚗" },
-              { name: "Tour Guiado", icon: "🗺️" },
-              { name: "Wi-Fi Premium", icon: "📶" },
-            ].map((item, index) => (
+            {additionalServices.map((item) => (
               <div
-                key={index}
+                key={item.id}
                 className="text-center p-4 rounded-lg border hover:border-primary transition-colors"
               >
-                <div className="text-3xl mb-2">{item.icon}</div>
-                <p className="text-sm">{item.name}</p>
+                {/* Ícone híbrido: banco → fallback local */}
+                <div className="text-3xl mb-2">
+                  {emojiMap[item.icone ?? ""] || iconMap[item.titulo] || "⭐"}
+                </div>
+                <p className="text-sm font-medium">{item.titulo}</p>
+                <p className="text-xs text-gray-500">{item.descricao}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Contact Section */}
+        {/* Rodapé */}
         <div className="text-center mt-16 p-8 bg-primary text-white rounded-lg">
           <h3 className="text-2xl mb-4">Precisa de algo especial?</h3>
           <p className="mb-6 opacity-90">
