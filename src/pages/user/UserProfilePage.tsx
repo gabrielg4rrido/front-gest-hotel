@@ -32,7 +32,7 @@ interface UserProfilePageProps {
 export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSaving, setIsSaving] = useState(false); // Para salvar texto E foto
   const [error, setError] = useState<string | null>(null);
   const [userData, setUserData] = useState<Cliente | null>(null);
   const [editedData, setEditedData] = useState({
@@ -41,11 +41,16 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
     cpf: "",
     dataNascimento: "",
     endereco: "",
+    telefone: "",
   });
+
+  // --- ATUALIZAÇÃO 1: Adicionar estado para o arquivo e preview ---
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // Estado para o modal de alteração de senha
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  // ... (resto dos estados de senha e delete)
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordData, setPasswordData] = useState({
@@ -53,8 +58,6 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
     novaSenha: "",
     confirmarSenha: "",
   });
-
-  // Estado para o modal de excluir conta
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -76,20 +79,19 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
         const clienteData = await apiService.getCliente(currentUser.id);
         setUserData(clienteData);
 
-        // Converter data para formato YYYY-MM-DD
         const formatDateForInput = (dateString: string) => {
           if (!dateString) return "";
           const date = new Date(dateString);
           return date.toISOString().split("T")[0];
         };
 
-        // Preencher formulário de edição com dados atuais
         setEditedData({
           nome: clienteData.nome || "",
           email: clienteData.email || "",
           cpf: clienteData.cpf || "",
           dataNascimento: formatDateForInput(clienteData.dataNascimento),
           endereco: clienteData.endereco || "",
+          telefone: clienteData.telefone || "",
         });
       } catch (err: any) {
         console.error("Erro ao carregar dados do usuário:", err);
@@ -102,6 +104,42 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
     loadUserData();
   }, [onNavigate]);
 
+  // --- ATUALIZAÇÃO 2: Adicionar o handler de mudança de arquivo ---
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (!file || !userData) return;
+
+    // 1. Criar preview visual imediato
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // 2. Fazer o upload do arquivo para a API
+    try {
+      setIsSaving(true); // Usar o mesmo estado de "salvando"
+      setError(null);
+      
+      // Chamar a nova função da API
+      const updatedCliente = await apiService.uploadFotoPerfil(userData.id, file);
+
+      // 3. Atualizar o estado local com os dados retornados (que contém a nova URL da foto)
+      setUserData(updatedCliente);
+      
+      // Limpar o preview, pois o userData.fotoPerfil agora é o correto
+      setPreviewUrl(null); 
+    } catch (err: any) {
+      console.error("Erro ao enviar foto:", err);
+      setError(err.message || "Erro ao enviar foto");
+      // Reverter o preview em caso de erro
+      setPreviewUrl(null);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Salva os campos de TEXTO
   const handleSave = async () => {
     if (!userData) return;
 
@@ -112,19 +150,18 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
       const updatedCliente = await apiService.updateCliente(userData.id, {
         nome: editedData.nome,
         email: editedData.email,
-        cpf: editedData.cpf,
+        cpf: editedData.cpf.replace(/\D/g, ""),
         dataNascimento: editedData.dataNascimento,
         endereco: editedData.endereco,
+        telefone: editedData.telefone.replace(/\D/g, ""),
       });
 
-      // Converter data para formato YYYY-MM-DD
       const formatDateForInput = (dateString: string) => {
         if (!dateString) return "";
         const date = new Date(dateString);
         return date.toISOString().split("T")[0];
       };
 
-      // Atualizar o estado com os dados retornados
       setUserData(updatedCliente);
       setEditedData({
         nome: updatedCliente.nome || "",
@@ -132,6 +169,7 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
         cpf: updatedCliente.cpf || "",
         dataNascimento: formatDateForInput(updatedCliente.dataNascimento),
         endereco: updatedCliente.endereco || "",
+        telefone: updatedCliente.telefone || "",
       });
       setIsEditing(false);
     } catch (err: any) {
@@ -144,7 +182,6 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
 
   const handleCancel = () => {
     if (userData) {
-      // Converter data para formato YYYY-MM-DD
       const formatDateForInput = (dateString: string) => {
         if (!dateString) return "";
         const date = new Date(dateString);
@@ -157,38 +194,47 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
         cpf: userData.cpf || "",
         dataNascimento: formatDateForInput(userData.dataNascimento),
         endereco: userData.endereco || "",
+        telefone: userData.telefone || "",
       });
     }
+    // Limpar qualquer preview de foto não salvo
+    setPreviewUrl(null);
     setIsEditing(false);
     setError(null);
   };
 
-  // Função para formatar CPF
+  // ... (Funções formatCPF, formatTelefone, formatDate, getFirstName, getLastName) ...
   const formatCPF = (cpf: string) => {
     if (!cpf) return "";
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
   };
-
-  // Função para formatar data
+  const formatTelefone = (tel: string) => {
+    if (!tel) return "";
+    tel = tel.replace(/\D/g, "");
+    if (tel.length === 11) {
+      return tel.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+    }
+    if (tel.length === 10) {
+      return tel.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+    }
+    return tel;
+  };
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
     return date.toLocaleDateString("pt-BR");
   };
-
-  // Separar nome em primeiro e último nome
   const getFirstName = (fullName: string) => {
     if (!fullName) return "";
     return fullName.split(" ")[0];
   };
-
   const getLastName = (fullName: string) => {
     if (!fullName) return "";
     const parts = fullName.split(" ");
     return parts.slice(1).join(" ");
   };
 
-  // Função para abrir o modal de alteração de senha
+  // ... (Funções de modal handleOpenPasswordModal, handleClosePasswordModal, handleChangePassword) ...
   const handleOpenPasswordModal = () => {
     setPasswordData({
       senhaAtual: "",
@@ -199,8 +245,6 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
     setPasswordSuccess(false);
     setIsPasswordModalOpen(true);
   };
-
-  // Função para fechar o modal de alteração de senha
   const handleClosePasswordModal = () => {
     setIsPasswordModalOpen(false);
     setPasswordData({
@@ -211,12 +255,8 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
     setPasswordError(null);
     setPasswordSuccess(false);
   };
-
-  // Função para alterar a senha
   const handleChangePassword = async () => {
     if (!userData) return;
-
-    // Validações
     if (
       !passwordData.senhaAtual ||
       !passwordData.novaSenha ||
@@ -225,29 +265,22 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
       setPasswordError("Todos os campos são obrigatórios");
       return;
     }
-
     if (passwordData.novaSenha !== passwordData.confirmarSenha) {
       setPasswordError("As senhas não coincidem");
       return;
     }
-
     if (passwordData.novaSenha.length < 6) {
       setPasswordError("A nova senha deve ter no mínimo 6 caracteres");
       return;
     }
-
     try {
       setIsChangingPassword(true);
       setPasswordError(null);
-
       await apiService.changePassword(userData.id, {
         senhaAtual: passwordData.senhaAtual,
         novaSenha: passwordData.novaSenha,
       });
-
       setPasswordSuccess(true);
-
-      // Fechar o modal após 2 segundos
       setTimeout(() => {
         handleClosePasswordModal();
       }, 2000);
@@ -259,29 +292,21 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
     }
   };
 
-  // Função para abrir o modal de excluir conta
+  // ... (Funções de modal handleOpenDeleteModal, handleCloseDeleteModal, handleDeleteAccount) ...
   const handleOpenDeleteModal = () => {
     setDeleteError(null);
     setIsDeleteModalOpen(true);
   };
-
-  // Função para fechar o modal de excluir conta
   const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false);
     setDeleteError(null);
   };
-
-  // Função para excluir a conta
   const handleDeleteAccount = async () => {
     if (!userData) return;
-
     try {
       setIsDeletingAccount(true);
       setDeleteError(null);
-
       await apiService.deleteCliente(userData.id);
-
-      // Fazer logout e redirecionar para home
       await apiService.logout();
       onNavigate("home");
     } catch (err: any) {
@@ -292,6 +317,8 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
     }
   };
 
+
+  // ... (Lógica de return isLoading, error, !userData) ...
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -302,7 +329,6 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
       </div>
     );
   }
-
   if (error && !userData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -319,12 +345,14 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
       </div>
     );
   }
-
   if (!userData) return null;
 
+
+  // --- ATUALIZAÇÃO 3: Modificar o JSX do Avatar ---
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
+        {/* ... (Botão Voltar e Título) ... */}
         <div className="mb-8">
           <Button
             variant="ghost"
@@ -344,14 +372,25 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
         )}
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Avatar e Info Básica */}
+          {/* Avatar e Info Básica - ATUALIZADO */}
           <div className="lg:col-span-1">
             <Card>
               <CardHeader className="text-center">
+                
+                {/* INÍCIO DA ATUALIZAÇÃO DO AVATAR */}
                 <div className="relative inline-block">
+                  <input
+                    type="file"
+                    id="fotoPerfilInput"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    disabled={!isEditing || isSaving} // Desabilitar se não estiver editando ou se estiver salvando
+                  />
                   <Avatar className="w-24 h-24 mx-auto">
                     <AvatarImage
-                      src={userData.fotoPerfil || undefined}
+                      // Mostrar preview, ou a foto do user, ou nada
+                      src={previewUrl || userData.fotoPerfil || undefined}
                       alt={userData.nome}
                     />
                     <AvatarFallback className="text-2xl">
@@ -359,23 +398,32 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
                       {getLastName(userData.nome)[0] || ""}
                     </AvatarFallback>
                   </Avatar>
+                  
+                  {/* O botão agora é um 'label' que ativa o input */}
                   {isEditing && (
-                    <Button
-                      size="sm"
-                      className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0"
-                      variant="secondary"
+                    <label
+                      htmlFor="fotoPerfilInput"
+                      className="absolute bottom-1 right-1 rounded-full w-8 h-8 p-0 flex items-center justify-center cursor-pointer bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                      title="Alterar foto de perfil"
                     >
-                      <Camera className="h-4 w-4" />
-                    </Button>
+                      {/* Mostrar loader se estiver salvando (isSaving) */}
+                      {isSaving ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Camera className="h-4 w-4" />
+                      )}
+                    </label>
                   )}
                 </div>
+                {/* FIM DA ATUALIZAÇÃO DO AVATAR */}
+
                 <CardTitle className="mt-4">{userData.nome}</CardTitle>
                 <p className="text-gray-600 pb-4">{userData.email}</p>
               </CardHeader>
             </Card>
           </div>
 
-          {/* Dados Pessoais */}
+          {/* Dados Pessoais (com o campo telefone) */}
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
@@ -406,7 +454,7 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
                       </Button>
                       <Button
                         size="sm"
-                        onClick={handleSave}
+                        onClick={handleSave} // Este botão agora salva só o TEXTO
                         disabled={isSaving}
                       >
                         {isSaving ? (
@@ -470,6 +518,27 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
                           setEditedData({
                             ...editedData,
                             cpf: e.target.value.replace(/\D/g, ""),
+                          })
+                        }
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    {/* Campo Telefone (já estava aqui) */}
+                    <div>
+                      <Label htmlFor="telefone">Telefone</Label>
+                      <Input
+                        id="telefone"
+                        type="tel"
+                        placeholder="(99) 99999-9999"
+                        value={
+                          isEditing
+                            ? editedData.telefone
+                            : formatTelefone(userData.telefone)
+                        }
+                        onChange={(e) =>
+                          setEditedData({
+                            ...editedData,
+                            telefone: e.target.value,
                           })
                         }
                         disabled={!isEditing}
@@ -552,7 +621,7 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
         </div>
       </div>
 
-      {/* Modal de Alteração de Senha */}
+      {/* ... (Modais de Alterar Senha e Excluir Conta) ... */}
       <Dialog open={isPasswordModalOpen} onOpenChange={setIsPasswordModalOpen}>
         <DialogContent>
           <DialogHeader>
@@ -640,8 +709,6 @@ export function UserProfilePage({ onNavigate }: UserProfilePageProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Modal de Confirmação de Exclusão de Conta */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <DialogContent>
           <DialogHeader>

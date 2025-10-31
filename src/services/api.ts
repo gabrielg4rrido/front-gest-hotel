@@ -39,6 +39,7 @@ export interface RegisterData {
   senha: string;
   cpf: string;
   endereco: string;
+  telefone: string;
   dataNascimento: string;
   fotoPerfil?: File;
 }
@@ -49,6 +50,7 @@ export interface LoginData {
 }
 
 export interface Cliente {
+  telefone: string;
   id: string;
   nome: string;
   email: string;
@@ -172,6 +174,7 @@ export const apiService = {
       formData.append("cpf", data.cpf);
       formData.append("endereco", data.endereco);
       formData.append("dataNascimento", data.dataNascimento);
+      formData.append("telefone", data.telefone);
       formData.append("fotoPerfil", data.fotoPerfil);
 
       const response = await fetch(`${API_BASE_URL}/clientes`, {
@@ -182,7 +185,7 @@ export const apiService = {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Erro ao registrar cliente");
+        throw new Error(errorData.erro || "Erro ao registrar cliente");
       }
 
       return response.json();
@@ -201,12 +204,13 @@ export const apiService = {
         cpf: data.cpf,
         endereco: data.endereco,
         dataNascimento: data.dataNascimento,
+        telefone: data.telefone,
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Erro ao registrar cliente");
+      throw new Error(errorData.erro || "Erro ao registrar cliente");
     }
 
     return response.json();
@@ -224,7 +228,7 @@ export const apiService = {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Erro ao fazer login");
+      throw new Error(errorData.erro || "Erro ao fazer login");
     }
 
     const loginResponse: LoginResponse = await response.json();
@@ -278,7 +282,7 @@ export const apiService = {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Erro ao obter dados do cliente");
+      throw new Error(errorData.erro || "Erro ao obter dados do cliente");
     }
 
     return response.json();
@@ -297,8 +301,39 @@ export const apiService = {
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(
-        errorData.message || "Erro ao atualizar dados do cliente"
+        errorData.erro || "Erro ao atualizar dados do cliente"
       );
+    }
+
+    return response.json();
+  },
+
+  async uploadFotoPerfil(id: string, file: File): Promise<Cliente> {
+    const formData = new FormData();
+    // O backend (ClienteController) espera um campo chamado "fotoPerfil"
+    formData.append("fotoPerfil", file);
+
+    // Precisamos usar 'fetch' diretamente para FormData,
+    // mas vamos pegar o token de autenticação
+    const token = TokenManager.getAccessToken();
+    const headers: HeadersInit = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    // AVISO: Estou assumindo que a rota do seu backend para esta função
+    // seja '/clientes/:id/foto'. Verifique no seu arquivo de rotas do backend se for diferente.
+    const response = await fetch(`${API_BASE_URL}/clientes/${id}/foto`, {
+      method: "POST", // Pode ser 'POST' ou 'PUT' dependendo da sua API
+      headers: headers,
+      body: formData,
+      // Não definir Content-Type para FormData, o browser faz isso
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      // Lembre-se que seu backend retorna a chave "erro"
+      throw new Error(errorData.erro || "Erro ao enviar foto");
     }
 
     return response.json();
@@ -353,7 +388,7 @@ export const apiService = {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Erro ao alterar senha");
+      throw new Error(errorData.erro || "Erro ao alterar senha");
     }
 
     return response.json();
@@ -367,7 +402,7 @@ export const apiService = {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Erro ao excluir conta");
+      throw new Error(errorData.erro || "Erro ao excluir conta");
     }
 
     return response.json();
