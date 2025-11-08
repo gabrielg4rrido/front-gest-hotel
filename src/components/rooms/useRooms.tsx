@@ -12,6 +12,7 @@ interface Room {
   image: string;
   rating: number;
   reviews: number;
+  status: string;
 }
 
 //

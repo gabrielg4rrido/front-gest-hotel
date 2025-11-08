@@ -15,6 +15,7 @@ interface Room {
   capacity: number;
   features: string[];
   image: string;
+  status: string;
 }
 
 interface RoomsPageProps {
@@ -78,18 +79,22 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
     }
   };
 
-  const getRoomStatus = (room: { id: string }) => {
-    const available = isRoomAvailable(
-      room.id,
-      searchData?.checkIn,
-      searchData?.checkOut
-    );
-    return {
-      text: available ? "Disponível" : "Indisponível",
-      variant: (available ? "default" : "destructive") as
-        | "default"
-        | "destructive",
-    };
+  const getRoomStatus = (room: Room): { text: string; variant: "default" | "destructive" | "warning" } => { 
+    
+    switch (room.status) {
+      case 'Disponível':
+        return { text: 'Disponível', variant: 'default' }; // Verde
+
+      case 'Manutenção':
+        return { text: 'Em Manutenção', variant: 'destructive' }; // Vermelho
+
+      case 'Ocupado': // Exemplo, se o banco tiver esse status
+        return { text: 'Ocupado', variant: 'warning' }; // Amarelo
+
+      // Um caso padrão para qualquer outro status
+      default:
+        return { text: room.status, variant: 'warning' }; // Amarelo
+    }
   };
 
   const clearFiltersAndSearch = () => {

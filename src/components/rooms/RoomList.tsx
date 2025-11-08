@@ -14,6 +14,7 @@ interface Room {
   capacity: number;
   features: string[];
   image: string;
+  status: string;
 }
 
 interface RoomListProps {
@@ -23,7 +24,7 @@ interface RoomListProps {
   searchData: any; // Simplified for brevity
   getRoomStatus: (room: Room) => {
     text: string;
-    variant: "default" | "destructive";
+    variant: "default" | "destructive" | "warning";
   };
   isRoomAvailable: (
     roomId: string,

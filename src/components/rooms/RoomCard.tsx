@@ -24,11 +24,28 @@ interface Room {
 
 interface RoomCardProps {
   room: Room;
-  status: { text: string; variant: "default" | "destructive" };
+  status: { text: string; variant: "default" | "destructive" | "warning" };
   onViewDetails: () => void;
   onReserve: () => void;
   isReserveDisabled: boolean;
 }
+
+const getStatusClasses = (variant: "default" | "destructive" | "warning") => {
+  switch (variant) {
+    case 'default':
+      // Verde (Funciona - como na sua imagem)
+      return 'bg-green-500 hover:bg-green-600 text-white';
+    case 'destructive':
+      // Vermelho (Use bg-red-600, que está no seu CSS)
+      return 'bg-red-100 text-white-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-white-900 dark:text-white-300';
+    case 'warning':
+      // Amarelo
+      return 'bg-yellow-500 hover:bg-yellow-600 text-white';
+    default:
+      // Padrão de fallback
+      return 'bg-gray-500 text-white';
+  }
+};
 
 export function RoomCard({
   room,
@@ -37,6 +54,7 @@ export function RoomCard({
   onReserve,
   isReserveDisabled,
 }: RoomCardProps) {
+
   return (
     <Card
       className="w-full overflow-hidden hover:shadow-xl transition-all duration-300 ease-in-out flex flex-col"
@@ -49,12 +67,11 @@ export function RoomCard({
           className="w-full h-full object-cover transition-transform duration-300"
         />
         <Badge
-          className={`absolute top-6 right-2 z-10 ${
-            status.variant === "default"
-              ? "bg-green-500 hover:bg-green-600"
-              : "bg-red-500 hover:bg-red-600"
-          } text-white`}
-          variant={status.variant}
+          // 1. Força a variante "default" para evitar conflitos
+          variant="default"
+          
+          // 2. Aplica as classes de cor manualmente
+          className={`absolute top-6 right-2 z-10 ${getStatusClasses(status.variant)}`}
         >
           {status.text}
         </Badge>
@@ -80,7 +97,7 @@ export function RoomCard({
               {room.features.map((feature, index) => (
                 <Badge
                   key={index}
-                  variant="secondary"
+                  variant="default"
                   className="text-xs whitespace-nowrap"
                 >
                   {feature}
