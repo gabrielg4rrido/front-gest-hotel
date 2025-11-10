@@ -23,7 +23,7 @@ export function RoomsPageHeader({
       <div className="w-full max-w-4xl text-center mb-8 min-h-[200px] flex items-center justify-center">
         <div className="w-full px-4">
           <h1 className="text-4xl mb-4">Nossos Quartos</h1>
-          <p className="text-gray-600 max-w-2xl">
+          <p className="text-gray-600 max-w-3xl">
             Escolha a acomodação perfeita para sua estadia. Todos os nossos
             quartos oferecem conforto e qualidade excepcionais.
           </p>
