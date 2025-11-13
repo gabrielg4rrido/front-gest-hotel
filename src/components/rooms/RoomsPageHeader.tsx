@@ -1,5 +1,6 @@
 import React from "react";
 import { SearchForm } from "../SearchForm"; // Ajuste o caminho se necessário
+import { Button } from "../ui/button";
 
 // Defina os tipos para as props que o componente receberá
 interface SearchData {
@@ -11,11 +12,13 @@ interface SearchData {
 interface RoomsPageHeaderProps {
   onSearch: (data: SearchData) => void;
   searchData: SearchData | null;
+  onClearFilters: () => void;
 }
 
 export function RoomsPageHeader({
   onSearch,
   searchData,
+  onClearFilters,
 }: RoomsPageHeaderProps) {
   return (
     // Envolvemos os dois blocos em um único elemento pai
@@ -33,9 +36,9 @@ export function RoomsPageHeader({
       <div className="w-full max-w-4xl mb-12 min-h-[150px]">
         <SearchForm onSearch={onSearch} />
         {searchData && (
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-            <p className="text-center text-blue-800">
-              <p className="text-center text-blue-800">
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg text-center">
+            <div className="flex justify-center items-center gap-3">
+              <p className="text-blue-800">
                 <strong>Busca:</strong>{" "}
                 {new Date(searchData.checkIn).toLocaleDateString("pt-BR", {
                   timeZone: "UTC",
@@ -47,10 +50,20 @@ export function RoomsPageHeader({
                 • {searchData.guests}{" "}
                 {searchData.guests === 1 ? "hóspede" : "hóspedes"}
               </p>
-              <span className="block mt-1 text-sm">
+
+              <span className="text-sm text-blue-600">
                 Mostrando apenas quartos disponíveis para este período.
               </span>
-            </p>
+
+              <span
+                onClick={onClearFilters}
+                className="text-cyan-800 font-medium underline underline-offset-2 cursor-pointer transition"
+              >
+                Limpar Filtros
+              </span>
+
+              
+            </div>
           </div>
         )}
       </div>

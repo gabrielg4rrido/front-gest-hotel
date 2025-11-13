@@ -1917,6 +1917,10 @@
     background-color: var(--color-green-500);
   }
 
+  .bg-cyan-800 {
+    background-color: var(--color-cyan-800);
+  }
+
   .bg-input-background {
     background-color: var(--input-background);
   }
@@ -1937,6 +1941,10 @@
 
   .bg-orange-100 {
     background-color: var(--color-orange-100);
+  }
+
+  .bg-orange-600 {
+    background-color: var(--color-orange-600);
   }
 
   .bg-popover {

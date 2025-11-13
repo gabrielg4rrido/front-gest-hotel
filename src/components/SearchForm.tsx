@@ -124,7 +124,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 
             {/* Search Button */}
             <div className="space-y-2 flex flex-col">
-              <Button type="submit" className="w-full mt-auto h-9 mb-2">
+              <Button type="submit" className="w-full mt-auto h-9 mb-2 bg-cyan-800">
                 <Search className="h-4 w-4" />
                 Buscar Quartos
               </Button>

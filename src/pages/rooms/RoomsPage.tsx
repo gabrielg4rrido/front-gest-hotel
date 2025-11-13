@@ -20,6 +20,7 @@ interface Room {
 
 interface RoomsPageProps {
   onNavigate: (page: string, roomId?: string) => void;
+  
 }
 
 export function RoomsPage({ onNavigate }: RoomsPageProps) {
@@ -32,7 +33,7 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
   const [filterType, setFilterType] = useState<string[]>([]);
 
   // O hook gerencia a complexidade dos dados
-  const { rooms, loading, error, refetch, isRoomAvailable } = useRooms({
+  const { rooms, loading, error, isRoomAvailable } = useRooms({
     searchData,
     filterType,
     sortBy,
@@ -122,7 +123,11 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
           />
 
           <div className="flex-1 min-w-0">
-            <RoomsPageHeader onSearch={handleSearch} searchData={searchData} />
+            <RoomsPageHeader 
+              onSearch={handleSearch} 
+              searchData={searchData} 
+              onClearFilters={clearFiltersAndSearch}
+            />
 
             <div className="w-full max-w-4xl flex flex-col items-center gap-8 min-h-[600px] pb-16">
               <RoomList

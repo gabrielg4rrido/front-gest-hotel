@@ -27,7 +27,7 @@ interface RoomListProps {
     variant: "default" | "destructive" | "warning";
   };
   isRoomAvailable: (
-    roomId: string,
+    status: string,
     checkIn?: string,
     checkOut?: string
   ) => boolean;
@@ -91,7 +91,7 @@ export function RoomList({
           onReserve={() => handleReserve(room)}
           isReserveDisabled={
             searchData &&
-            !isRoomAvailable(room.id, searchData.checkIn, searchData.checkOut)
+            !isRoomAvailable(room.status, searchData.checkIn, searchData.checkOut)
           }
         />
       ))}

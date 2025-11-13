@@ -26,19 +26,18 @@ interface UseRoomsProps {
   sortBy: string;
 }
 
-// A função de disponibilidade pode viver aqui, pois é parte da lógica de dados.
 const isRoomAvailable = (
-  roomId: string,
+  status: string,
   checkIn?: string,
   checkOut?: string
 ): boolean => {
+  // Se o usuário não selecionou datas, mostra todos os quartos
   if (!checkIn || !checkOut) {
     return true;
   }
-  // TODO: Substitua esta lógica mockada pela resposta real da sua API.
-  // A API já deve filtrar por disponibilidade, então este mock pode ser removido
-  // quando a API estiver funcionando 100%.
-  return roomId === "qps450-005056a4845d";
+
+  // Considera "Disponível" como quarto livre
+  return status === "Disponível";
 };
 
 export function useRooms({ searchData, filterType, sortBy }: UseRoomsProps) {
@@ -66,8 +65,22 @@ export function useRooms({ searchData, filterType, sortBy }: UseRoomsProps) {
       if (!response.ok) {
         throw new Error("Erro ao buscar quartos");
       }
+
       const data: Room[] = await response.json();
-      setRooms(data);
+
+      const formattedData: Room[] = data.map((room: any) => ({
+        ...room,
+        status:
+          room.status === 0
+            ? "Disponível"
+            : room.status === 1
+            ? "Ocupado"
+            : room.status === 2
+            ? "Manutenção"
+            : room.status,
+      }));
+
+      setRooms(formattedData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro desconhecido");
       setRooms([]);
@@ -91,7 +104,7 @@ export function useRooms({ searchData, filterType, sortBy }: UseRoomsProps) {
       // Mantendo por enquanto, caso a API retorne todos e o front-end precise filtrar.
       if (
         searchData &&
-        !isRoomAvailable(room.id, searchData.checkIn, searchData.checkOut)
+        !isRoomAvailable(room.status, searchData.checkIn, searchData.checkOut)
       ) {
         return false;
       }

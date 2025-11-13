@@ -34,7 +34,7 @@ const getStatusClasses = (variant: "default" | "destructive" | "warning") => {
   switch (variant) {
     case 'default':
       // Verde (Funciona - como na sua imagem)
-      return 'bg-green-500 hover:bg-green-600 text-white';
+      return 'bg-green-100 text-black text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-white-900 dark:text-white-300';
     case 'destructive':
       // Vermelho (Use bg-red-600, que está no seu CSS)
       return 'bg-red-100 text-white-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-white-900 dark:text-white-300';
@@ -87,7 +87,7 @@ export function RoomCard({
       <CardContent className="flex flex-col flex-grow p-4 pt-0">
         <div className="pb-3">
           <div className="text-left mb-2">
-            <Badge className="bg-primary text-white text-sm px-3 py-1 rounded-full">
+            <Badge className="bg-cyan-100 text-black text-sm px-3 py-1 rounded-full">
               R${room.priceDisplay}/noite
             </Badge>
           </div>
@@ -98,7 +98,7 @@ export function RoomCard({
                 <Badge
                   key={index}
                   variant="default"
-                  className="text-xs whitespace-nowrap"
+                  className="text-xs whitespace-nowrap bg-cyan-100 text-black"
                 >
                   {feature}
                 </Badge>
@@ -108,7 +108,7 @@ export function RoomCard({
         </div>
 
         <div className="flex gap-2 mt-auto pt-3 border-t border-gray-200">
-          <Button className="flex-1 min-w-0" onClick={onViewDetails}>
+          <Button variant="outline" className="flex-1 min-w-0 bg-cyan-800 text-white" onClick={onViewDetails}>
             Ver Detalhes
           </Button>
           <Button
