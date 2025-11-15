@@ -9,6 +9,7 @@ interface Room {
   id: string;
   name: string;
   description: string;
+  resume: string,
   price: number;
   priceDisplay: string;
   type: "dorm" | "private" | "suite";
@@ -16,6 +17,8 @@ interface Room {
   features: string[];
   image: string;
   status: string;
+  rating?: number;
+  reviews?: number;
 }
 
 interface RoomsPageProps {

@@ -4,15 +4,16 @@ interface Room {
   id: string;
   name: string;
   description: string;
+  resume: string,
   price: number;
   priceDisplay: string;
   type: "dorm" | "private" | "suite";
   capacity: number;
   features: string[];
   image: string;
-  rating: number;
-  reviews: number;
   status: string;
+  rating?: number;
+  reviews?: number;
 }
 
 //
@@ -50,7 +51,7 @@ export function useRooms({ searchData, filterType, sortBy }: UseRoomsProps) {
     setError(null);
     try {
       // A URL da sua API
-      let url = "http://localhost:3002/api/quarto";
+      let url = "http://localhost:3003/api/quarto";
 
       // A API deve idealmente lidar com a disponibilidade
       if (searchData) {

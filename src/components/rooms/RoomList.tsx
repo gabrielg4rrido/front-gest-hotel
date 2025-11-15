@@ -3,11 +3,11 @@ import { Loader2 } from "lucide-react";
 import { RoomCard } from "./RoomCard";
 import { Button } from "../ui/button";
 
-// Reutilize a interface Room
 interface Room {
   id: string;
   name: string;
   description: string;
+  resume: string,
   price: number;
   priceDisplay: string;
   type: "dorm" | "private" | "suite";
@@ -15,6 +15,8 @@ interface Room {
   features: string[];
   image: string;
   status: string;
+  rating?: number;
+  reviews?: number;
 }
 
 interface RoomListProps {
@@ -83,17 +85,18 @@ export function RoomList({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full transition-all duration-300">
       {rooms.map((room) => (
-        <RoomCard
-          key={room.id}
-          room={room}
-          status={getRoomStatus(room)}
-          onViewDetails={() => onNavigate("room-details", room.id)}
-          onReserve={() => handleReserve(room)}
-          isReserveDisabled={
-            searchData &&
-            !isRoomAvailable(room.status, searchData.checkIn, searchData.checkOut)
-          }
-        />
+        <div key={room.id}>
+          <RoomCard
+            room={room}
+            status={getRoomStatus(room)}
+            onViewDetails={() => onNavigate("room-details", room.id)}
+            onReserve={() => handleReserve(room)}
+            isReserveDisabled={
+              searchData &&
+              !isRoomAvailable(room.status, searchData.checkIn, searchData.checkOut)
+            }
+          />
+        </div>
       ))}
     </div>
   );

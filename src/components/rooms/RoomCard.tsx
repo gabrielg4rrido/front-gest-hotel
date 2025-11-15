@@ -14,12 +14,16 @@ interface Room {
   id: string;
   name: string;
   description: string;
+  resume: string,
   price: number;
   priceDisplay: string;
   type: "dorm" | "private" | "suite";
   capacity: number;
   features: string[];
   image: string;
+  status: string;
+  rating?: number;
+  reviews?: number;
 }
 
 interface RoomCardProps {
@@ -81,7 +85,7 @@ export function RoomCard({
           {room.name}
         </CardTitle>
         <CardDescription className="text-sm text-left">
-          {room.description}
+          {room.resume}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col flex-grow p-4 pt-0">
