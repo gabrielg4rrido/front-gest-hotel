@@ -4,9 +4,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Breadcrumb } from "../components/Breadcrumb";
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Breadcrumb } from "../../components/Breadcrumb";
 import { Star } from "lucide-react";
 
 interface Service {

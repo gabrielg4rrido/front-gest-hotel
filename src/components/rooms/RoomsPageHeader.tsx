@@ -34,8 +34,8 @@ export function RoomsPageHeader({
         <SearchForm onSearch={onSearch} />
         {searchData && (
           <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-            <p className="text-center text-blue-800">
-              <p className="text-center text-blue-800">
+            <div className="text-center text-blue-800">
+              <p>
                 <strong>Busca:</strong>{" "}
                 {new Date(searchData.checkIn).toLocaleDateString("pt-BR", {
                   timeZone: "UTC",
@@ -50,7 +50,7 @@ export function RoomsPageHeader({
               <span className="block mt-1 text-sm">
                 Mostrando apenas quartos disponíveis para este período.
               </span>
-            </p>
+            </div>
           </div>
         )}
       </div>

@@ -5,10 +5,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { Breadcrumb } from "../components/Breadcrumb";
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { Breadcrumb } from "../../components/Breadcrumb";
 
 interface Service {
   id: number;

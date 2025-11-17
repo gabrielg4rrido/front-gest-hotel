@@ -70,7 +70,7 @@ export function RoomDetailsPage({
       try {
         // Busca apenas os dados da API
         const response = await fetch(
-          `http://localhost:3002/api/quarto/${roomId}`
+          `http://localhost:3001/api/quarto/${roomId}`
         );
         if (!response.ok) {
           throw new Error(

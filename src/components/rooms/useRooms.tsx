@@ -14,7 +14,6 @@ interface Room {
   reviews: number;
 }
 
-//
 interface UseRoomsProps {
   searchData: {
     checkIn: string;
@@ -25,21 +24,6 @@ interface UseRoomsProps {
   sortBy: string;
 }
 
-// A função de disponibilidade pode viver aqui, pois é parte da lógica de dados.
-const isRoomAvailable = (
-  roomId: string,
-  checkIn?: string,
-  checkOut?: string
-): boolean => {
-  if (!checkIn || !checkOut) {
-    return true;
-  }
-  // TODO: Substitua esta lógica mockada pela resposta real da sua API.
-  // A API já deve filtrar por disponibilidade, então este mock pode ser removido
-  // quando a API estiver funcionando 100%.
-  return roomId === "qps450-005056a4845d";
-};
-
 export function useRooms({ searchData, filterType, sortBy }: UseRoomsProps) {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,11 +33,11 @@ export function useRooms({ searchData, filterType, sortBy }: UseRoomsProps) {
     setLoading(true);
     setError(null);
     try {
-      // A URL da sua API
-      let url = "http://localhost:3002/api/quarto";
+      let url = "http://localhost:3003/api/quarto";
 
-      // A API deve idealmente lidar com a disponibilidade
-      if (searchData) {
+      // Se houver dados de busca, usa o endpoint de quartos disponíveis
+      if (searchData && searchData.checkIn && searchData.checkOut) {
+        url = "http://localhost:3003/api/quarto/disponiveis";
         const params = new URLSearchParams();
         params.append("checkIn", searchData.checkIn);
         params.append("checkOut", searchData.checkOut);
@@ -86,14 +70,7 @@ export function useRooms({ searchData, filterType, sortBy }: UseRoomsProps) {
       if (filterType.length > 0 && !filterType.includes(room.type)) {
         return false;
       }
-      // Se a API já filtrou por disponibilidade, este filtro do lado do cliente pode não ser necessário.
-      // Mantendo por enquanto, caso a API retorne todos e o front-end precise filtrar.
-      if (
-        searchData &&
-        !isRoomAvailable(room.id, searchData.checkIn, searchData.checkOut)
-      ) {
-        return false;
-      }
+      // A API já filtra por disponibilidade, então não precisamos filtrar aqui
       return true;
     });
 
@@ -110,7 +87,19 @@ export function useRooms({ searchData, filterType, sortBy }: UseRoomsProps) {
           return 0;
       }
     });
-  }, [rooms, filterType, sortBy, searchData]);
+  }, [rooms, filterType, sortBy]);
+
+  const isRoomAvailable = (
+    roomId: string,
+    checkIn?: string,
+    checkOut?: string
+  ) => {
+    // If no search dates provided, consider room available for reservation flow
+    if (!searchData || !checkIn || !checkOut) return true;
+    // When a search is active the API endpoint returns only available rooms,
+    // so check if the room id exists in the fetched rooms array.
+    return rooms.some((r: Room) => r.id === roomId);
+  };
 
   return {
     rooms: filteredAndSortedRooms,

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "../components/ui/button";
+import { Button } from "../../components/ui/button";
 import {
   BookingSummary,
   GuestDataForm,
   AdditionalServices,
   PaymentForm,
-} from "../components/payment";
+} from "../../components/payment";
 
 interface PaymentPageProps {
   onNavigate: (page: string) => void;
