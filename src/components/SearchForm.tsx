@@ -10,7 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Calendar, Users, Search } from "lucide-react";
+import { Alert, AlertDescription } from "./ui/alert";
+import { Calendar, Users, Search, AlertCircle } from "lucide-react";
 
 interface SearchFormProps {
   onSearch: (searchData: {
@@ -24,12 +25,14 @@ export function SearchForm({ onSearch }: SearchFormProps) {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     if (!checkIn || !checkOut) {
-      alert("Por favor, selecione as datas de check-in e check-out");
+      setError("Por favor, selecione as datas de check-in e check-out");
       return;
     }
 
@@ -39,12 +42,12 @@ export function SearchForm({ onSearch }: SearchFormProps) {
     today.setHours(0, 0, 0, 0);
 
     if (checkInDate < today) {
-      alert("A data de check-in não pode ser anterior a hoje");
+      setError("A data de check-in não pode ser anterior ou igual a de hoje");
       return;
     }
 
     if (checkOutDate <= checkInDate) {
-      alert("A data de check-out deve ser posterior à data de check-in");
+      setError("A data de check-out deve ser posterior à data de check-in");
       return;
     }
 
@@ -63,6 +66,12 @@ export function SearchForm({ onSearch }: SearchFormProps) {
   return (
     <Card className="w-full max-w-4xl mx-auto bg-white shadow-lg">
       <CardContent className="p-6">
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             {/* Check-in */}

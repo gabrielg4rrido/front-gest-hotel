@@ -90,7 +90,7 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
       } catch (err) {
         console.error("Erro ao carregar serviços:", err);
         setError(
-          "⚠️ O servidor não está disponível. Inicie o backend para visualizar os serviços."
+          "⚠️ O servidor não está disponível. Tente novamente mais tarde."
         );
       } finally {
         setLoading(false);
@@ -111,7 +111,11 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
   }
 
   if (error) {
-    return <div className="text-center mt-10 text-red-500">{error}</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center text-red-500 px-4">{error}</div>
+      </div>
+    );
   }
 
   return (

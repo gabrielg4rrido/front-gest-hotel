@@ -70,7 +70,7 @@ export function RoomDetailsPage({
       try {
         // Busca apenas os dados da API
         const response = await fetch(
-          `http://localhost:3001/api/quarto/${roomId}`
+          `http://localhost:3003/api/quarto/${roomId}`
         );
         if (!response.ok) {
           throw new Error(
@@ -83,7 +83,7 @@ export function RoomDetailsPage({
         setRoom(apiRoomData);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Ocorreu um erro desconhecido."
+          "⚠️ O servidor não está disponível. Tente novamente mais tarde."
         );
       } finally {
         setLoading(false);
@@ -145,15 +145,6 @@ export function RoomDetailsPage({
           onNavigate={onNavigate}
         />
 
-        {/* Galeria de Imagens - só mostra se houver imagens */}
-        {room.images && room.images.length > 0 && (
-          <Card className="overflow-hidden mb-8">
-            <CardContent className="p-6">
-              <ImageGallery images={room.images} title={room.name} />
-            </CardContent>
-          </Card>
-        )}
-
         <Card className="mb-8">
           <CardHeader>
             <div className="flex justify-between items-start">
@@ -177,6 +168,22 @@ export function RoomDetailsPage({
             </div>
           </CardHeader>
           <CardContent>
+            {/* Imagem do quarto - exibe abaixo do nome */}
+            {room.image && (
+              <div className="mb-6">
+                <div className="relative overflow-hidden bg-gray-200 rounded-lg h-[180px] md:h-[220px]">
+                  <img
+                    src={room.image}
+                    alt={room.name}
+                    className="w-full h-full object-cover"
+                    onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODgiIGhlaWdodD0iODgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBvcGFjaXR5PSIuMyIgZmlsbD0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIzLjciPjxyZWN0IHg9IjE2IiB5PSIxNiIgd2lkdGg9IjU2IiBoZWlnaHQ9IjU2IiByeD0iNiIvPjxwYXRoIGQ9Im0xNiA1OCAxNi0xOCAzMiAzMiIvPjxjaXJjbGUgY3g9IjUzIiBjeT0iMzUiIHI9IjciLz48L3N2Zz4KCg==';
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Descrição - só mostra se houver */}
             {room.description && (
               <p className="text-gray-700 mb-6">{room.description}</p>

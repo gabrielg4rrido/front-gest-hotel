@@ -42,32 +42,33 @@ export function RoomCard({
       className="w-full overflow-hidden hover:shadow-xl transition-all duration-300 ease-in-out flex flex-col"
       style={{ minHeight: "500px" }}
     >
-      <div className="relative flex-shrink-0 overflow-hidden bg-gray-200 h-[200px] lg:h-[250px]">
-        <ImageWithFallback
-          src={room.image}
-          alt={room.name}
-          className="w-full h-full object-cover transition-transform duration-300"
-        />
-        <Badge
-          className={`absolute top-6 right-2 z-10 ${
-            status.variant === "default"
-              ? "bg-green-500 hover:bg-green-600"
-              : "bg-red-500 hover:bg-red-600"
-          } text-white`}
-          variant={status.variant}
-        >
-          {status.text}
-        </Badge>
-      </div>
       <CardHeader className="flex-shrink-0 p-4 pb-2">
-        <CardTitle className="text-lg truncate text-left">
-          {room.name}
-        </CardTitle>
-        <CardDescription className="text-sm text-left">
-          {room.description}
-        </CardDescription>
+        <CardTitle className="text-lg truncate text-left">{room.name}</CardTitle>
+        <CardDescription className="text-sm text-left">{room.description}</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col flex-grow p-4 pt-0">
+
+      {/* Imagem do quarto abaixo do nome */}
+      <div className="px-4">
+        <div className="relative overflow-hidden bg-gray-200 rounded-md h-[200px] lg:h-[250px]">
+          <ImageWithFallback
+            src={room.image}
+            alt={room.name}
+            className="w-full h-full object-cover transition-transform duration-300"
+          />
+          <Badge
+            className={`absolute top-3 right-3 z-10 ${
+              status.variant === "default"
+                ? "bg-green-500 hover:bg-green-600"
+                : "bg-red-500 hover:bg-red-600"
+            } text-white`}
+            variant={status.variant}
+          >
+            {status.text}
+          </Badge>
+        </div>
+      </div>
+
+      <CardContent className="flex flex-col flex-grow p-4 pt-4">
         <div className="pb-3">
           <div className="text-left mb-2">
             <Badge className="bg-primary text-white text-sm px-3 py-1 rounded-full">
