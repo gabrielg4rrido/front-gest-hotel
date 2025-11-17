@@ -44,7 +44,7 @@ export function RoomDetailsPage({
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`http://localhost:3002/api/quarto/${roomId}`);
+        const response = await fetch(`http://localhost:3003/api/quarto/${roomId}`);
         if (!response.ok) {
           throw new Error("Quarto não encontrado ou falha na comunicação.");
         }
