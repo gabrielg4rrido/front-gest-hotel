@@ -14,7 +14,7 @@ interface ApiRoom {
   description: string;
   price: number;
   capacity: number;
-  imagem: string;
+  image: string;
   // Campos que inferi do seu JSX (opcionais)
   area?: string;
   beds?: string;
@@ -51,7 +51,7 @@ export function RoomDetailsPage({
         const apiRoomData: ApiRoom = await response.json();
         const formattedRoom = {
           ...apiRoomData,
-          image: apiRoomData.imagem?.trim(),
+          image: apiRoomData.image?.trim(),
         };
         setRoom(formattedRoom);
       } catch (err) {
@@ -107,7 +107,7 @@ export function RoomDetailsPage({
 
         {/* Galeria de Imagens */}
         <GalleryCard
-          images={room.imagem ? [room.imagem] : []}
+          images={room.image ? [room.image] : []}
           title={room.name}
         />
 
