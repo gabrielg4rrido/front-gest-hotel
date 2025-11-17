@@ -62,12 +62,26 @@ export function useRooms({ searchData, filterType, sortBy }: UseRoomsProps) {
         url += `?${params.toString()}`;
       }
 
-      const response = await fetch(url);
+      let response;
+
+      try {
+        response = await fetch(url, { method: "GET" });
+      } catch (err) {
+        console.error("Erro de rede:", err);
+        throw new Error("Falha ao conectar ao servidor.");
+      }
+
       if (!response.ok) {
         throw new Error("Erro ao buscar quartos");
       }
 
-      const data: Room[] = await response.json();
+      let data;
+      
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error("Resposta inválida do servidor.");
+      }
 
       const formattedData: Room[] = data.map((room: any) => ({
         ...room,

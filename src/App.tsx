@@ -17,7 +17,7 @@ import { apiService, TokenManager } from "./services/api";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState("home");
-  const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
     null
   );
@@ -60,12 +60,12 @@ export default function App() {
     checkAuth();
   }, []);
 
-  const handleNavigate = (page: string, itemId?: number) => {
+  const handleNavigate = (page: string, id?: string | number) => {
     setCurrentPage(page);
-    if (page === "room-details" && itemId) {
-      setSelectedRoomId(itemId);
-    } else if (page === "service-details" && itemId) {
-      setSelectedServiceId(itemId);
+    if (page === "room-details" && typeof id === "string") {
+      setSelectedRoomId(id);
+    } else if (page === "service-details" && typeof id === "number") {
+      setSelectedServiceId(id);
     }
   };
 
