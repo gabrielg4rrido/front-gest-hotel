@@ -69,6 +69,7 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
         price: room.price,
         dates: { checkIn: searchData.checkIn, checkOut: searchData.checkOut },
         guests: searchData.guests,
+        capacity: room.capacity,
       };
       sessionStorage.setItem("paymentData", JSON.stringify(paymentData));
       onNavigate("payment");

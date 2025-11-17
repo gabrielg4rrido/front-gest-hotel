@@ -125,6 +125,8 @@ export function RoomDetailsPage({
       name: room.name,
       price: room.price,
       guests: room.capacity,
+      capacity: room.capacity,
+      roomId: roomId,
     });
   };
 

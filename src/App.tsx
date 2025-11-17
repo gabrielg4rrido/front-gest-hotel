@@ -31,6 +31,8 @@ export default function App() {
     };
     guests?: number;
     duration?: number;
+    capacity?: number;
+    roomId?: number;
   } | null>(null);
 
   // Estado de autenticação (mock)
@@ -83,6 +85,8 @@ export default function App() {
       dates: data.dates,
       guests: data.guests,
       duration: data.duration,
+      capacity: data.capacity,
+      roomId: data.roomId,
     });
     setCurrentPage("payment");
   };

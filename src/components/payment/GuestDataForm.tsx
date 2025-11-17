@@ -24,11 +24,13 @@ interface GuestData {
 interface GuestDataFormProps {
   guestData: GuestData;
   onGuestDataChange: (data: GuestData) => void;
+  maxCapacity?: number;
 }
 
 export function GuestDataForm({
   guestData,
   onGuestDataChange,
+  maxCapacity = 6,
 }: GuestDataFormProps) {
   const updateGuestData = (updates: Partial<GuestData>) => {
     onGuestDataChange({ ...guestData, ...updates });
@@ -56,7 +58,7 @@ export function GuestDataForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {[1, 2, 3, 4, 5, 6].map((num) => (
+              {Array.from({ length: maxCapacity }, (_, i) => i + 1).map((num) => (
                 <SelectItem key={num} value={num.toString()}>
                   {num} {num === 1 ? "hóspede" : "hóspedes"}
                 </SelectItem>

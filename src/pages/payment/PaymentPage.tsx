@@ -8,7 +8,7 @@ import {
 } from "../../components/payment";
 
 interface PaymentPageProps {
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, roomId?: number) => void;
   bookingData?: {
     type: "room" | "service";
     name: string;
@@ -19,6 +19,8 @@ interface PaymentPageProps {
     };
     guests?: number;
     duration?: number;
+    capacity?: number;
+    roomId?: number;
   };
 }
 
@@ -157,7 +159,13 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
         <div className="mb-8">
           <Button
             variant="ghost"
-            onClick={() => onNavigate("home")}
+            onClick={() => {
+              if (booking.type === "room" && bookingData?.roomId) {
+                onNavigate("room-details", bookingData.roomId);
+              } else {
+                onNavigate("home");
+              }
+            }}
             className="mb-4"
           >
             ← Voltar
@@ -185,6 +193,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
             <GuestDataForm
               guestData={guestData}
               onGuestDataChange={setGuestData}
+              maxCapacity={bookingData?.capacity || 6}
             />
 
             {/* 🔹 Agora os serviços vêm do backend */}
@@ -204,7 +213,13 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
               onInstallmentsChange={setInstallments}
               onCardDataChange={setCardData}
               onPayment={handlePayment}
-              onCancel={() => onNavigate("home")}
+              onCancel={() => {
+                if (booking.type === "room" && bookingData?.roomId) {
+                  onNavigate("room-details", bookingData.roomId);
+                } else {
+                  onNavigate("home");
+                }
+              }}
             />
           </div>
         </div>
