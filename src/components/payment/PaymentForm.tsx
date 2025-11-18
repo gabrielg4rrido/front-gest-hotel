@@ -36,6 +36,7 @@ interface PaymentFormProps {
   onCardDataChange: (data: CardData) => void;
   onPayment: () => void;
   onCancel: () => void;
+  isSubmitting?: boolean;
 }
 
 interface ApiPaymentMethodsResponse {
@@ -55,6 +56,7 @@ interface ApiPaymentMethod {
 
 interface NormalizedPaymentMethod {
   id: string;
+  label: string;
   value: string;
   requiresCard: boolean;
   discountPercent: number;
@@ -99,6 +101,7 @@ export function PaymentForm({
   onCardDataChange,
   onPayment,
   onCancel,
+  isSubmitting = false,
 }: PaymentFormProps) {
   const [methods, setMethods] = useState<NormalizedPaymentMethod[]>([]);
   const [loadingMethods, setLoadingMethods] = useState(false);
@@ -113,7 +116,7 @@ export function PaymentForm({
       setLoadingMethods(true);
       setMethodsError(null);
       try {
-        const res = await fetch("http://localhost:3002/api/metodo-pagamento");
+        const res = await fetch("http://localhost:3005/api/metodo-pagamento");
         if (!res.ok) throw new Error("Falha ao buscar métodos");
 
         const json: ApiPaymentMethodsResponse = await res.json();
@@ -300,18 +303,30 @@ export function PaymentForm({
         )}
 
         <div className="flex gap-4 pt-6">
-          <Button variant="outline" className="flex-1" onClick={onCancel}>
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
             Cancelar
           </Button>
           <Button
             className="flex-1"
             onClick={onPayment}
             size="lg"
-            disabled={!selectedMethod}
+            disabled={!selectedMethod || isSubmitting}
           >
-            {selectedMethod
-              ? `Pagar R$ ${totalWithDiscount.toFixed(2)}`
-              : "Selecione um método"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Processando...
+              </>
+            ) : selectedMethod ? (
+              `Pagar R$ ${totalWithDiscount.toFixed(2)}`
+            ) : (
+              "Selecione um método"
+            )}
           </Button>
         </div>
       </CardContent>

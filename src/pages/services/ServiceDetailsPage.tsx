@@ -49,7 +49,7 @@ export function ServiceDetailsPage({
     async function fetchService() {
       try {
         const res = await fetch(
-          `http://localhost:3001/api/services/${serviceId}`
+          `http://localhost:3004/api/services/${serviceId}`
         );
         const data = await res.json();
 

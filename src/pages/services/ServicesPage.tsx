@@ -72,8 +72,8 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
     async function fetchData() {
       try {
         const [servicesRes, additionalRes] = await Promise.all([
-          fetch("http://localhost:3001/api/services"),
-          fetch("http://localhost:3001/api/additional-services"),
+          fetch("http://localhost:3004/api/services"),
+          fetch("http://localhost:3004/api/additional-services"),
         ]);
 
         if (!servicesRes.ok || !additionalRes.ok) {

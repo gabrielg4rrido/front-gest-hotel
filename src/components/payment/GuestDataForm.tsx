@@ -18,7 +18,11 @@ interface GuestData {
   lastName: string;
   cpf: string;
   email: string;
+  phone?: string;
+  birthday?: string;
   isMainGuest: string;
+  checkIn: string;
+  checkOut: string;
 }
 
 interface GuestDataFormProps {
@@ -45,6 +49,30 @@ export function GuestDataForm({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Datas da Reserva */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="checkIn">Data de Check-in</Label>
+            <Input
+              id="checkIn"
+              type="date"
+              value={guestData.checkIn}
+              onChange={(e) => updateGuestData({ checkIn: e.target.value })}
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="checkOut">Data de Check-out</Label>
+            <Input
+              id="checkOut"
+              type="date"
+              value={guestData.checkOut}
+              onChange={(e) => updateGuestData({ checkOut: e.target.value })}
+              required
+            />
+          </div>
+        </div>
+
         {/* Quantidade de Hóspedes */}
         <div>
           <Label htmlFor="totalGuests">Quantidade de Hóspedes</Label>
@@ -130,14 +158,15 @@ export function GuestDataForm({
               />
             </div>
             <div>
-              <Label htmlFor="dataDeNascimento">Data de Nascimento</Label>
+              <Label htmlFor="birthday">Data de Nascimento</Label>
               <Input
                 id="birthday"
                 type="date"
                 placeholder="dd / mm / aaaa"
                 className="w-full"
+                value={guestData.birthday}
+                onChange={(e) => updateGuestData({ birthday: e.target.value })}
                 required
-                style={{ color: "gray" }}
               />
             </div>
 

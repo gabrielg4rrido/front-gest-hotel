@@ -6,6 +6,9 @@ import {
   AdditionalServices,
   PaymentForm,
 } from "../../components/payment";
+import { apiService, TokenManager } from "../../services/api";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 interface PaymentPageProps {
   onNavigate: (page: string, roomId?: number) => void;
@@ -40,11 +43,17 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     lastName: "",
     email: "",
     phone: "",
+    cpf: "",
+    birthday: "",
     isMainGuest: "main",
+    checkIn: bookingData?.dates?.checkIn || "",
+    checkOut: bookingData?.dates?.checkOut || "",
   });
 
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [additionalServices, setAdditionalServices] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // 🔹 Mapeamento de ícones armazenados no banco (campo "icone")
   const emojiMap: Record<string, string> = {
@@ -60,7 +69,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
 
   // 🔹 Busca serviços adicionais direto do back-end
   useEffect(() => {
-    fetch("http://localhost:3001/api/additional-services")
+    fetch("http://localhost:3004/api/additional-services")
       .then((res) => res.json())
       .then((data) => {
         console.log("Serviços adicionais recebidos:", data);
@@ -137,20 +146,114 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
     { value: "12", label: `12x de R$ ${(total / 12).toFixed(2)}` },
   ];
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
+    console.log("🔵 handlePayment foi chamado!");
+    console.log("📦 guestData:", guestData);
+    console.log("📦 booking:", booking);
+    console.log("📦 bookingData:", bookingData);
+    
+    setError(null);
+
+    // Validação dos dados do hóspede
     if (
       !guestData.firstName ||
       !guestData.lastName ||
       !guestData.email ||
       !guestData.phone
     ) {
-      alert("Por favor, preencha todos os dados do hóspede.");
+      setError("Por favor, preencha todos os dados do hóspede.");
       return;
     }
-    alert(
-      `Pagamento processado com sucesso para ${guestData.firstName} ${guestData.lastName}!`
-    );
-    onNavigate("home");
+
+    // Validação para reservas de quarto
+    if (booking.type === "room") {
+      if (!guestData.checkIn || !guestData.checkOut) {
+        setError("Datas de check-in e check-out são obrigatórias.");
+        return;
+      }
+
+      if (!bookingData?.roomId) {
+        setError("ID do quarto não encontrado.");
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Obter dados do usuário logado
+      const userData = TokenManager.getUserData();
+      if (!userData?.id) {
+        setError("Usuário não autenticado.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Preparar dados da reserva
+      const reservaData = {
+        dataEntrada: guestData.checkIn,
+        dataSaida: guestData.checkOut,
+        status: "Pendente",
+        idQuarto: bookingData!.roomId,
+        idCliente: userData.id,
+        precoTotal: total,
+        quantidadeHospedes: guestData.totalGuests,
+        quantidadeDiarias: days,
+        idHospede: userData.id,
+      };
+
+      // Preparar dados do hóspede
+      const hospedeData = {
+        nome: guestData.firstName,
+        sobrenome: guestData.lastName,
+        email: guestData.email,
+        telefone: guestData.phone,
+        cpf: guestData.cpf,
+        dataNascimento: guestData.birthday,
+      };
+
+      console.log("Enviando reserva:", reservaData);
+      console.log("Enviando hóspede:", hospedeData);
+
+      // Enviar para o back-end
+      const response = await fetch("http://localhost:3002/api/reserva", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${TokenManager.getAccessToken()}`,
+        },
+        body: JSON.stringify({
+          reserva: reservaData,
+          hospede: hospedeData,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao criar reserva");
+      }
+
+      const result = await response.json();
+      console.log("Reserva criada com sucesso:", result);
+
+      // Limpar sessionStorage
+      sessionStorage.removeItem("paymentData");
+
+      // Redirecionar para página de sucesso ou minhas reservas
+      alert(
+        `Reserva realizada com sucesso para ${guestData.firstName} ${guestData.lastName}!`
+      );
+      onNavigate("my-reservations");
+    } catch (err) {
+      console.error("Erro ao criar reserva:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro ao processar reserva. Tente novamente."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -190,6 +293,13 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
             <GuestDataForm
               guestData={guestData}
               onGuestDataChange={setGuestData}
@@ -220,6 +330,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
                   onNavigate("home");
                 }
               }}
+              isSubmitting={isSubmitting}
             />
           </div>
         </div>

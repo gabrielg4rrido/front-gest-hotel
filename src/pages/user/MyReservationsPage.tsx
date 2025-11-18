@@ -133,7 +133,7 @@ export function MyReservationsPage({
   const fetchReservations = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:3001/api/reservas");
+      const response = await axios.get("http://localhost:3004/api/reservas");
 
       const mappedReservations = response.data.map((apiRes: any) => ({
         id: apiRes.idReserva,
@@ -170,7 +170,7 @@ export function MyReservationsPage({
     if (window.confirm("Tem a certeza de que deseja cancelar esta reserva?")) {
       try {
         await axios.delete(
-          `http://localhost:3001/api/reservas/${reservationId}`
+          `http://localhost:3002/api/reserva/${reservationId}`
         );
         // Após o cancelamento, busca novamente a lista atualizada de reservas
         fetchReservations();
