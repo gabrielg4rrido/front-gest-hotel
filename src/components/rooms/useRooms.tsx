@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import env from "../../config/env";
 
 interface Room {
   id: string;
@@ -33,11 +34,11 @@ export function useRooms({ searchData, filterType, sortBy }: UseRoomsProps) {
     setLoading(true);
     setError(null);
     try {
-      let url = "http://localhost:3003/api/quarto";
+      let url = `${env.API_QUARTO_URL}/api/quarto`;
 
       // Se houver dados de busca, usa o endpoint de quartos disponíveis
       if (searchData && searchData.checkIn && searchData.checkOut) {
-        url = "http://localhost:3003/api/quarto/disponiveis";
+        url = `${env.API_QUARTO_URL}/api/quarto/disponiveis`;
         const params = new URLSearchParams();
         params.append("checkIn", searchData.checkIn);
         params.append("checkOut", searchData.checkOut);

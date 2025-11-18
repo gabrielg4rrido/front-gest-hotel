@@ -1,4 +1,6 @@
-const API_BASE_URL = "http://localhost:3000";
+import env from '../config/env';
+
+const API_BASE_URL = env.API_AUTH_URL;
 
 type AuthListener = () => void;
 

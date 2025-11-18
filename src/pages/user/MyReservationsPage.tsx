@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import env from "../../config/env";
 import {
   Card,
   CardContent,
@@ -133,7 +134,7 @@ export function MyReservationsPage({
   const fetchReservations = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:3004/api/reservas");
+      const response = await axios.get(`${env.API_SERVICOS_URL}/api/reservas`);
 
       const mappedReservations = response.data.map((apiRes: any) => ({
         id: apiRes.idReserva,
@@ -170,7 +171,7 @@ export function MyReservationsPage({
     if (window.confirm("Tem a certeza de que deseja cancelar esta reserva?")) {
       try {
         await axios.delete(
-          `http://localhost:3002/api/reserva/${reservationId}`
+          `${env.API_RESERVA_URL}/api/reserva/${reservationId}`
         );
         // Após o cancelamento, busca novamente a lista atualizada de reservas
         fetchReservations();

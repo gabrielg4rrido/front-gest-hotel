@@ -9,6 +9,7 @@ import {
 import { Button } from "../../components/ui/button";
 import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
 import { Breadcrumb } from "../../components/Breadcrumb";
+import env from "../../config/env";
 
 interface Service {
   id: number;
@@ -72,8 +73,8 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
     async function fetchData() {
       try {
         const [servicesRes, additionalRes] = await Promise.all([
-          fetch("http://localhost:3004/api/services"),
-          fetch("http://localhost:3004/api/additional-services"),
+          fetch(`${env.API_SERVICOS_URL}/api/services`),
+          fetch(`${env.API_SERVICOS_URL}/api/additional-services`),
         ]);
 
         if (!servicesRes.ok || !additionalRes.ok) {

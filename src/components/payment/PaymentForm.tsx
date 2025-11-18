@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import env from "../../config/env";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -116,7 +117,7 @@ export function PaymentForm({
       setLoadingMethods(true);
       setMethodsError(null);
       try {
-        const res = await fetch("http://localhost:3005/api/metodo-pagamento");
+        const res = await fetch(`${env.API_PAGAMENTO_URL}/api/metodo-pagamento`);
         if (!res.ok) throw new Error("Falha ao buscar métodos");
 
         const json: ApiPaymentMethodsResponse = await res.json();

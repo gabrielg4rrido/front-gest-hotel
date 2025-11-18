@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
+import env from "../../config/env";
 import {
   Card,
   CardContent,
@@ -70,7 +71,7 @@ export function RoomDetailsPage({
       try {
         // Busca apenas os dados da API
         const response = await fetch(
-          `http://localhost:3003/api/quarto/${roomId}`
+          `${env.API_QUARTO_URL}/api/quarto/${roomId}`
         );
         if (!response.ok) {
           throw new Error(

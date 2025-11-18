@@ -8,6 +8,7 @@ import {
 import { Button } from "../../components/ui/button";
 import { Breadcrumb } from "../../components/Breadcrumb";
 import { Star } from "lucide-react";
+import env from "../../config/env";
 
 interface Service {
   id: number;
@@ -49,7 +50,7 @@ export function ServiceDetailsPage({
     async function fetchService() {
       try {
         const res = await fetch(
-          `http://localhost:3004/api/services/${serviceId}`
+          `${env.API_SERVICOS_URL}/api/services/${serviceId}`
         );
         const data = await res.json();
 

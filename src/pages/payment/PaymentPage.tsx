@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
+import env from "../../config/env";
 import {
   BookingSummary,
   GuestDataForm,
@@ -69,7 +70,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
 
   // 🔹 Busca serviços adicionais direto do back-end
   useEffect(() => {
-    fetch("http://localhost:3004/api/additional-services")
+    fetch(`${env.API_SERVICOS_URL}/api/additional-services`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Serviços adicionais recebidos:", data);
@@ -216,7 +217,7 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
       console.log("Enviando hóspede:", hospedeData);
 
       // Enviar para o back-end
-      const response = await fetch("http://localhost:3002/api/reserva", {
+      const response = await fetch(`${env.API_RESERVA_URL}/api/reserva`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
