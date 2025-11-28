@@ -238,58 +238,6 @@ export function ServiceDetailsPage({
             </CardContent>
           </Card>
         </div>
-
-        {/* Avaliações */}
-        {service.avaliacoes && service.avaliacoes.length > 0 && (
-          <div className="mt-12 bg-white rounded-xl shadow-sm p-6">
-            <h3 className="text-2xl font-semibold mb-4">
-              Avaliações dos Clientes
-            </h3>
-
-            <div className="flex items-center mb-6">
-              <Star className="text-yellow-400 fill-yellow-400 mr-2" />
-              <span className="font-bold text-lg">
-                {(
-                  service.avaliacoes.reduce((acc, r) => acc + r.nota, 0) /
-                  service.avaliacoes.length
-                ).toFixed(1)}{" "}
-                de 5
-              </span>
-              <span className="text-gray-500 ml-2">
-                ({service.avaliacoes.length} avaliações)
-              </span>
-            </div>
-
-            <div className="space-y-4">
-              {service.avaliacoes.map((r, idx) => (
-                <div key={idx} className="border-b pb-4">
-                  <div className="flex items-center mb-2">
-                    <div className="bg-gray-200 text-gray-700 font-semibold rounded-full w-8 h-8 flex items-center justify-center mr-3">
-                      {r.autor.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-medium">{r.autor}</p>
-                      <p className="text-xs text-gray-500">{r.data}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center mb-1">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < r.nota
-                            ? "text-yellow-400 fill-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 text-sm">{r.comentario}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
