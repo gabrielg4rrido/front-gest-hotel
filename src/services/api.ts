@@ -65,6 +65,32 @@ export interface Cliente {
   updatedAt: string;
 }
 
+export interface Reserva {
+  idReserva: string;
+  dataEntrada: string;
+  dataSaida: string;
+  status: string;
+  idQuarto: string;
+  idCliente: string;
+  precoTotal: string;
+  telefone: string | null;
+  quantidadeHospedes: number;
+  quantidadeDiarias: number;
+  idHospede: string;
+  nomeHospede: string;
+  emailHospede: string;
+  // 🔹 NOVO: Dados enriquecidos do quarto
+  quarto?: {
+    nome: string;
+    tipo: string;
+    descricao: string;
+    capacidade: number;
+    precoPorNoite: number;
+    imagens: string[];
+    comodidades: string[];
+  } | null;
+}
+
 // Gerenciamento de tokens
 class TokenManager {
   private static readonly ACCESS_TOKEN_KEY = "accessToken";
@@ -405,6 +431,63 @@ export const apiService = {
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.erro || "Erro ao excluir conta");
+    }
+
+    return response.json();
+  },
+
+  // Buscar reservas do cliente
+  async getReservas(): Promise<Reserva[]> {
+    const token = TokenManager.getAccessToken();
+    const userData = TokenManager.getUserData();
+    
+    if (!userData?.id) {
+      throw new Error("Usuário não autenticado");
+    }
+
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    // 🔹 CORRIGIDO: Adicionar idCliente como query parameter
+    const response = await fetch(`${env.API_RESERVA_URL}/api/reserva?idCliente=${userData.id}`, {
+      method: "GET",
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.erro || "Erro ao buscar reservas");
+    }
+
+    const data = await response.json();
+    // A API pode retornar um array direto ou um objeto com propriedade data/reservas
+    return Array.isArray(data) ? data : data.reservas || [];
+  },
+
+  // Cancelar reserva
+  async cancelReserva(idReserva: string): Promise<{ message: string }> {
+    const token = TokenManager.getAccessToken();
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${env.API_RESERVA_URL}/api/reserva/${idReserva}`, {
+      method: "DELETE",
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.erro || "Erro ao cancelar reserva");
     }
 
     return response.json();

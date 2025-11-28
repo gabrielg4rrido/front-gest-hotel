@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -26,8 +26,12 @@ import {
   Star,
   Plane,
   Camera,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { apiService, Reserva } from "../../services/api";
+import { Alert, AlertDescription } from "../../components/ui/alert";
 
 interface MyTravelsPageProps {
   onNavigate: (page: string) => void;
@@ -52,92 +56,99 @@ interface Travel {
 }
 
 export function MyTravelsPage({ onNavigate }: MyTravelsPageProps) {
-  const [travels] = useState<Travel[]>([
-    {
-      id: "TRIP001",
-      type: "room",
-      name: "Suíte Master com Vista Mar",
-      location: "Hotel Carioca Palace",
-      dates: {
-        checkIn: "2025-12-20",
-        checkOut: "2025-12-25",
-      },
-      guests: 2,
-      price: 2800,
-      status: "confirmed",
-      image:
-        "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600",
-      additionalServices: [
-        "Spa & Wellness",
-        "Restaurante Gourmet",
-        "Concierge 24h",
-      ],
-    },
-    {
-      id: "TRIP002",
-      type: "room",
-      name: "Quarto Deluxe",
-      location: "Hotel Carioca Palace",
-      dates: {
-        checkIn: "2025-10-15",
-        checkOut: "2025-10-18",
-      },
-      guests: 1,
-      price: 1050,
-      status: "completed",
-      image:
-        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600",
-      additionalServices: ["Academia Premium"],
-      rating: 5,
-      review:
-        "Experiência incrível! O quarto era confortável e o atendimento excepcional.",
-      photos: [
-        "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=300",
-        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=300",
-        "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=300",
-      ],
-    },
-    {
-      id: "TRIP003",
-      type: "room",
-      name: "Quarto Standard",
-      location: "Hotel Carioca Palace",
-      dates: {
-        checkIn: "2024-08-10",
-        checkOut: "2024-08-12",
-      },
-      guests: 2,
-      price: 600,
-      status: "completed",
-      image:
-        "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600",
-      rating: 4,
-      review: "Boa estadia, quarto limpo e bem localizado.",
-      photos: [
-        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300",
-        "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=300",
-      ],
-    },
-  ]);
+  const [travels, setTravels] = useState<Travel[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const getStatusColor = (status: string) => {
-    const colors = {
-      confirmed: "bg-green-100 text-green-800",
-      pending: "bg-yellow-100 text-yellow-800",
-      cancelled: "bg-red-100 text-red-800",
-      completed: "bg-blue-100 text-blue-800",
-    };
-    return colors[status as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  useEffect(() => {
+    loadReservas();
+  }, []);
+
+  const loadReservas = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const reservas = await apiService.getReservas();
+      const mappedTravels = reservas.map(mapReservaToTravel);
+      setTravels(mappedTravels);
+    } catch (err) {
+      console.error("Erro ao carregar reservas:", err);
+      setError(err instanceof Error ? err.message : "Erro ao carregar reservas");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getStatusText = (status: string) => {
-    const texts = {
-      confirmed: "Confirmada",
-      pending: "Pendente",
-      cancelled: "Cancelada",
-      completed: "Concluída",
+  const mapReservaToTravel = (reserva: Reserva): Travel => {
+    // Mapear status da API para status do componente
+    const statusMap: Record<string, Travel["status"]> = {
+      "Pendente": "pending",
+      "Confirmada": "confirmed",
+      "Confirmado": "confirmed",
+      "Cancelada": "cancelled",
+      "Cancelado": "cancelled",
+      "Concluída": "completed",
+      "Concluído": "completed",
+      "Finalizada": "completed",
+      "Finalizado": "completed",
     };
-    return texts[status as keyof typeof texts] || status;
+
+    const status = statusMap[reserva.status] || "pending";
+
+    // Verificar se a reserva é passada (data de saída anterior à data atual)
+    const isCompleted = new Date(reserva.dataSaida) < new Date() && status === "confirmed";
+
+    // 🔹 CORRIGIDO: Exibir apenas nome e tipo do quarto, sem código UUID
+    let quartoNome = "Quarto";
+    if (reserva.quarto?.nome) {
+      // Remove códigos UUID (padrão: letras+números-UUID)
+      // Exemplo: "Quarto qqs215-005056a4845d Standard" -> "Quarto Standard"
+      quartoNome = reserva.quarto.nome
+        .replace(/\s+[a-z0-9]+-[a-f0-9-]+/gi, '') // Remove padrão "codigo-uuid"
+        .replace(/\s{2,}/g, ' ') // Remove espaços duplos
+        .trim();
+    }
+    
+    const quartoTipo = reserva.quarto?.tipo || 'Standard';
+    const quartoImagem = reserva.quarto?.imagens?.[0] || "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600";
+    const quartoComodidades = reserva.quarto?.comodidades || [];
+
+    // Formatar nome final: se já incluir o tipo, não repetir
+    const nomeCompleto = quartoNome.toLowerCase().includes(quartoTipo.toLowerCase())
+      ? quartoNome
+      : `${quartoNome} ${quartoTipo}`;
+
+    return {
+      id: reserva.idReserva,
+      type: "room",
+      name: nomeCompleto,
+      location: "Hotel Carioca Palace",
+      dates: {
+        checkIn: reserva.dataEntrada,
+        checkOut: reserva.dataSaida,
+      },
+      guests: reserva.quantidadeHospedes,
+      price: parseFloat(reserva.precoTotal),
+      status: isCompleted ? "completed" : status,
+      image: quartoImagem,
+      additionalServices: quartoComodidades.slice(0, 3), // Mostrar até 3 comodidades
+    };
+  };
+
+  const handleCancelReserva = async (idReserva: string) => {
+    if (!confirm("Tem certeza que deseja cancelar esta reserva?")) {
+      return;
+    }
+
+    try {
+      await apiService.cancelReserva(idReserva);
+      // Recarregar reservas
+      await loadReservas();
+      alert("Reserva cancelada com sucesso!");
+    } catch (err) {
+      console.error("Erro ao cancelar reserva:", err);
+      alert(err instanceof Error ? err.message : "Erro ao cancelar reserva");
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -159,123 +170,114 @@ export function MyTravelsPage({ onNavigate }: MyTravelsPageProps) {
 
   const breadcrumbItems = [{ label: "Minhas Viagens", href: "#" }];
 
-  const TravelCard = ({ travel }: { travel: Travel }) => (
+  const TravelCard: React.FC<{ travel: Travel }> = ({ travel }) => (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="flex flex-col lg:flex-row">
-        <div className="lg:w-1/3 aspect-video lg:aspect-square relative">
-          <ImageWithFallback
-            src={travel.image}
-            alt={travel.name}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute top-4 left-4">
-            <Badge className={getStatusColor(travel.status)}>
-              {getStatusText(travel.status)}
-            </Badge>
-          </div>
-          {travel.status === "completed" && travel.photos && (
-            <div className="absolute bottom-4 right-4">
-              <Badge className="bg-white/90 text-gray-800">
-                <Camera className="w-3 h-3 mr-1" />
-                {travel.photos.length}
-              </Badge>
+      <div className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-xl">{travel.name}</h3>
             </div>
-          )}
+            <div className="flex items-center gap-1 text-gray-600 text-sm">
+              <MapPin className="h-3 w-3" />
+              <span>{travel.location}</span>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-gray-600">Código</p>
+            <p className="text-xs">{travel.id}</p>
+          </div>
         </div>
 
-        <div className="flex-1 p-6">
-          <div className="flex justify-between items-start mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="flex items-center gap-2 text-sm">
+            <Calendar className="h-4 w-4 text-gray-400" />
             <div>
-              <h3 className="text-xl mb-1">{travel.name}</h3>
-              <div className="flex items-center gap-1 text-gray-600 text-sm mb-2">
-                <MapPin className="h-3 w-3" />
-                <span>{travel.location}</span>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Código</p>
-              <p className="text-xs">{travel.id}</p>
+              <p>Check-in: {formatDate(travel.dates.checkIn)}</p>
+              <p>Check-out: {formatDate(travel.dates.checkOut)}</p>
             </div>
           </div>
+          <div className="flex items-center gap-2 text-sm">
+            <Users className="h-4 w-4 text-gray-400" />
+            <span>
+              {travel.guests} {travel.guests === 1 ? "hóspede" : "hóspedes"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <Clock className="h-4 w-4 text-gray-400" />
+            <span>
+              {calculateDays(travel.dates.checkIn, travel.dates.checkOut)}{" "}
+              {calculateDays(travel.dates.checkIn, travel.dates.checkOut) ===
+              1
+                ? "diária"
+                : "diárias"}
+            </span>
+          </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-4 w-4 text-gray-400" />
-              <div>
-                <p>Check-in: {formatDate(travel.dates.checkIn)}</p>
-                <p>Check-out: {formatDate(travel.dates.checkOut)}</p>
+        {travel.additionalServices &&
+          travel.additionalServices.length > 0 && (
+            <div className="mb-4">
+              <p className="text-sm mb-2">Serviços inclusos:</p>
+              <div className="flex flex-wrap gap-1">
+                {travel.additionalServices.map((service, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">
+                    {service}
+                  </Badge>
+                ))}
               </div>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Users className="h-4 w-4 text-gray-400" />
-              <span>
-                {travel.guests} {travel.guests === 1 ? "hóspede" : "hóspedes"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="h-4 w-4 text-gray-400" />
-              <span>
-                {calculateDays(travel.dates.checkIn, travel.dates.checkOut)}{" "}
-                {calculateDays(travel.dates.checkIn, travel.dates.checkOut) ===
-                1
-                  ? "diária"
-                  : "diárias"}
-              </span>
-            </div>
+          )}
+
+        <Separator className="my-4" />
+
+        <div className="flex justify-between items-center">
+          <div>
+            <p className="text-lg">R$ {travel.price.toFixed(2)}</p>
+            <p className="text-sm text-gray-600">Total</p>
           </div>
 
-          {travel.additionalServices &&
-            travel.additionalServices.length > 0 && (
-              <div className="mb-4">
-                <p className="text-sm mb-2">Serviços inclusos:</p>
-                <div className="flex flex-wrap gap-1">
-                  {travel.additionalServices.map((service, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {service}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Eye className="h-4 w-4 mr-2" />
+              Detalhes
+            </Button>
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Recibo
+            </Button>
+            {travel.status === "confirmed" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-red-600 hover:text-red-700"
+                onClick={() => handleCancelReserva(travel.id)}
+              >
+                Cancelar
+              </Button>
             )}
-
-          <Separator className="my-4" />
-
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-lg">R$ {travel.price.toFixed(2)}</p>
-              <p className="text-sm text-gray-600">Total</p>
-            </div>
-
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Eye className="h-4 w-4 mr-2" />
-                Detalhes
+            {travel.status === "completed" && (
+              <Button size="sm" onClick={() => onNavigate("rooms")}>
+                <Plane className="h-4 w-4 mr-2" />
+                Reservar Novamente
               </Button>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Recibo
-              </Button>
-              {travel.status === "confirmed" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-red-600 hover:text-red-700"
-                >
-                  Cancelar
-                </Button>
-              )}
-              {travel.status === "completed" && (
-                <Button size="sm">
-                  <Plane className="h-4 w-4 mr-2" />
-                  Reservar Novamente
-                </Button>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
     </Card>
   );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-gray-400" />
+          <p className="text-gray-600">Carregando suas viagens...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -291,35 +293,13 @@ export function MyTravelsPage({ onNavigate }: MyTravelsPageProps) {
           </p>
         </div>
 
-        {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl text-green-600">
-                {upcomingTravels.length}
-              </div>
-              <p className="text-sm text-gray-600">Próximas Viagens</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl text-blue-600">{pastTravels.length}</div>
-              <p className="text-sm text-gray-600">Viagens Realizadas</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl text-purple-600">
-                {travels.reduce(
-                  (acc, t) =>
-                    acc + calculateDays(t.dates.checkIn, t.dates.checkOut),
-                  0
-                )}
-              </div>
-              <p className="text-sm text-gray-600">Dias de Viagem</p>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Erro */}
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         {/* Viagens */}
         <Tabs defaultValue="upcoming" className="space-y-6">

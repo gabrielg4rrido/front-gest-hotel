@@ -150,21 +150,10 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
   const handlePayment = async () => {
     console.log("🔵 handlePayment foi chamado!");
     console.log("📦 guestData:", guestData);
-    console.log("📦 booking:", booking);
-    console.log("📦 bookingData:", bookingData);
+    console.log("📦 cardData:", cardData);
+    console.log("📦 paymentMethod:", paymentMethod);
     
     setError(null);
-
-    // Validação dos dados do hóspede
-    if (
-      !guestData.firstName ||
-      !guestData.lastName ||
-      !guestData.email ||
-      !guestData.phone
-    ) {
-      setError("Por favor, preencha todos os dados do hóspede.");
-      return;
-    }
 
     // Validação para reservas de quarto
     if (booking.type === "room") {
@@ -175,6 +164,14 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
 
       if (!bookingData?.roomId) {
         setError("ID do quarto não encontrado.");
+        return;
+      }
+    }
+
+    // 🔹 NOVO: Validação dos dados de pagamento
+    if (paymentMethod === "credit") {
+      if (!cardData.number || !cardData.name || !cardData.expiry || !cardData.cvv) {
+        setError("Por favor, preencha todos os dados do cartão.");
         return;
       }
     }
@@ -200,10 +197,9 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
         precoTotal: total,
         quantidadeHospedes: guestData.totalGuests,
         quantidadeDiarias: days,
-        idHospede: userData.id,
       };
 
-      // Preparar dados do hóspede
+      // 🔹 NOVO: Preparar dados do hóspede
       const hospedeData = {
         nome: guestData.firstName,
         sobrenome: guestData.lastName,
@@ -213,45 +209,70 @@ export function PaymentPage({ onNavigate, bookingData }: PaymentPageProps) {
         dataNascimento: guestData.birthday,
       };
 
+      // 🔹 NOVO: Preparar dados do pagamento
+      const pagamentoData = {
+        metodoPagamento: paymentMethod,
+        cartao: paymentMethod === "credit" ? {
+          number: cardData.number.replace(/\s/g, ""), // Remove espaços
+          holder: cardData.name,
+          expMonth: parseInt(cardData.expiry.split("/")[0]),
+          expYear: parseInt("20" + cardData.expiry.split("/")[1]),
+          cvv: cardData.cvv,
+        } : undefined,
+        parcelas: parseInt(installments),
+      };
+
       console.log("Enviando reserva:", reservaData);
       console.log("Enviando hóspede:", hospedeData);
+      console.log("Enviando pagamento:", pagamentoData);
 
-      // Enviar para o back-end
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+      // 🔹 MODIFICADO: Enviar dados de hóspede e pagamento junto com a reserva
       const response = await fetch(`${env.API_RESERVA_URL}/api/reserva`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${TokenManager.getAccessToken()}`,
         },
         body: JSON.stringify({
           reserva: reservaData,
-          hospede: hospedeData,
+          hospede: hospedeData, // 🔹 NOVO: Incluir dados do hóspede
+          pagamento: pagamentoData, // 🔹 NOVO: Incluir dados do pagamento
         }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Erro ao criar reserva");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.message || `Erro HTTP: ${response.status}`);
       }
 
       const result = await response.json();
-      console.log("Reserva criada com sucesso:", result);
+      console.log("✅ Reserva criada com sucesso:", result);
 
       // Limpar sessionStorage
       sessionStorage.removeItem("paymentData");
 
-      // Redirecionar para página de sucesso ou minhas reservas
-      alert(
-        `Reserva realizada com sucesso para ${guestData.firstName} ${guestData.lastName}!`
-      );
+      // Redirecionar para página de sucesso
+      alert("✅ Reserva e pagamento realizados com sucesso!");
       onNavigate("my-reservations");
     } catch (err) {
-      console.error("Erro ao criar reserva:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Erro ao processar reserva. Tente novamente."
-      );
+      console.error("❌ Erro ao criar reserva:", err);
+      
+      if (err instanceof Error) {
+        if (err.name === 'AbortError') {
+          setError("Timeout: A API não respondeu a tempo. Verifique se os serviços estão rodando.");
+        } else if (err.message.includes('Failed to fetch')) {
+          setError("Erro de conexão: Não foi possível conectar à API. Verifique se o Docker está rodando.");
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError("Erro inesperado ao processar reserva. Tente novamente.");
+      }
     } finally {
       setIsSubmitting(false);
     }
