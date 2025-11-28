@@ -14,7 +14,7 @@ interface EnvConfig {
 }
 
 const env: EnvConfig = {
-  API_AUTH_URL: import.meta.env.VITE_API_AUTH_URL || 'http://localhost:3000',
+  API_AUTH_URL: import.meta.env.VITE_API_AUTH_URL || 'http://localhost:3001',
   API_RESERVA_URL: import.meta.env.VITE_API_RESERVA_URL || 'http://localhost:3002',
   API_QUARTO_URL: import.meta.env.VITE_API_QUARTO_URL || 'http://localhost:3003',
   API_SERVICOS_URL: import.meta.env.VITE_API_SERVICOS_URL || 'http://localhost:3004',
