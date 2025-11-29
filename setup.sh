@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+set -e
+
+echo "===> Clonando repositórios..."
+
+git clone https://github.com/gabrielg4rrido/front-gest-hotel.git
+git clone https://github.com/gabrielg4rrido/cp-ms-pagamento.git
+git clone https://github.com/PedroCarv21/cliente-adm-app.git
+git clone https://github.com/ferreiraalisson/API-quarto-hotelCariocaPalace.git
+git clone https://github.com/ApoloSouza/proj-reserva.git
+git clone https://github.com/CaioTMZ1/servico_extra.git
+
+echo "===> Criando docker-compose.yml..."
+
+cat > docker-compose.yml << 'EOF'
+version: '3.8'
+
+services:
+  # API de Clientes e Administração
+  cliente-adm-api:
+    build:
+      context: ./cliente-adm-app
+      dockerfile: Dockerfile
+    container_name: hotel-cliente-adm-api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      NODE_ENV: production
+      DB_HOST: edumysql.acesso.rj.senac.br
+      DB_USER: 20252_prjint5
+      DB_PASSWORD: Senac@2025
+      DB_NAME: 20252_prjint5_pedrocarvalho
+      DB_PORT: 3306
+      JWT_SECRET: sua_chave_secreta_super_segura_aqui
+      JWT_REFRESH_SECRET: sua_chave_refresh_token_super_segura_aqui
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      FRONTEND_URL: http://localhost:3000
+    networks:
+      - hotel-network
+    volumes:
+      - ./cliente-adm-app/uploads:/usr/src/app/uploads
+
+  # API de Quartos
+  quarto-api:
+    build:
+      context: ./API-quarto-hotelCariocaPalace
+      dockerfile: Dockerfile
+    container_name: hotel-quarto-api
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      DB_HOST: edumysql.acesso.rj.senac.br
+      DB_USER: 20252_prjint5
+      DB_PASSWORD: Senac@2025
+      DB_NAME: 20252_prjint5_alissonferreira
+      DB_PORT: 3306
+      RESERVA_API_URL: http://cliente-adm-api:3001
+    networks:
+      - hotel-network
+
+  # API de Serviços Extras
+  servico-extra-api:
+    build:
+      context: ./servico_extra
+      dockerfile: Dockerfile
+    container_name: hotel-servico-extra-api
+    restart: unless-stopped
+    ports:
+      - "3004:3001"
+    environment:
+      PORT: 3001
+      DB_HOST: edumysql.acesso.rj.senac.br
+      DB_USER: 20252_prjint5
+      DB_PASSWORD: Senac@2025
+      DB_NAME: 20252_prjint5_caiotomaz
+      DB_PORT: 3306
+    networks:
+      - hotel-network
+
+  # Microsserviço de Pagamento
+  pagamento-api:
+    build:
+      context: ./cp-ms-pagamento
+      dockerfile: Dockerfile
+    container_name: hotel-pagamento-api
+    restart: unless-stopped
+    ports:
+      - "3005:3005"
+    environment:
+      PORT: 3005
+      NODE_ENV: production
+      DB_HOST: edumysql.acesso.rj.senac.br
+      DB_USER: 20252_prjint5
+      DB_PASSWORD: Senac@2025
+      DB_NAME: 20252_prjint5_gabrielgarrido
+      DB_PORT: 3306
+      CORS_ORIGINS: http://localhost:3001,http://localhost:3000
+      TOKENIZATION_SECRET: dev-tokenization-secret
+      GATEWAY_WEBHOOK_SECRET: dev-webhook-secret
+      PUBLIC_BASE_URL: http://localhost:3005
+    networks:
+      - hotel-network
+
+  # API de Reservas
+  reserva-api:
+    build:
+      context: ./proj-reserva
+      dockerfile: Dockerfile
+    container_name: hotel-reserva-api
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      PORT: 3002
+      NODE_ENV: production
+      DB_HOST: edumysql.acesso.rj.senac.br
+      DB_USER: 20252_prjint5
+      DB_PASSWORD: Senac@2025
+      DB_NAME: 20252_prjint5_apolosouza
+      DB_PORT: 3306
+      DB_CONNECTION_LIMIT: 10
+      DB_QUEUE_LIMIT: 0
+      DB_WAIT_FOR_CONNECTIONS: "true"
+      DEFAULT_RESERVATION_STATUS: Pendente
+      QUARTO_API_URL: http://quarto-api:3003
+      PAGAMENTO_API_URL: http://pagamento-api:3005
+    networks:
+      - hotel-network
+
+networks:
+  hotel-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+EOF
+
+echo "===> Pronto! Repositórios clonados e docker-compose.yml criado."
+
+
