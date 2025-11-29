@@ -134,7 +134,7 @@ export function MyReservationsPage({
   const fetchReservations = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${env.API_RESERVA_URL}/api/reservas`);
+      const response = await axios.get(`${env.API_RESERVA_URL}/api/reserva`);
 
       const mappedReservations = response.data.map((apiRes: any) => ({
         id: apiRes.idReserva,

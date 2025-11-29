@@ -24,7 +24,7 @@ interface PaymentPageProps {
     guests?: number;
     duration?: number;
     capacity?: number;
-    roomId?: number;
+    roomId?: string;
   };
 }
 

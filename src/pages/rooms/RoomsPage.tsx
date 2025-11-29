@@ -65,6 +65,7 @@ export function RoomsPage({ onNavigate }: RoomsPageProps) {
     if (searchData) {
       const paymentData = {
         type: "room" as const,
+        roomId: room.id,   
         name: room.name,
         price: room.price,
         dates: { checkIn: searchData.checkIn, checkOut: searchData.checkOut },
